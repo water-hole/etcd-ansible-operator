@@ -1,0 +1,9 @@
+- hosts: localhost
+  tasks:
+  - debug: msg="Running Etcd Ansible Operator Playbook"
+  - import_role:
+      name: "create_tls_secrets"
+  - import_role:
+      name: "lookup"
+  - import_role:
+      name: "reconcile"

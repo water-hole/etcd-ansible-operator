@@ -1,0 +1,7 @@
+---
+- name: pick a member to remove
+  set_fact:
+    l_remove_members: "{{ [item] }}"
+    l_members: "{{ l_members | difference(item) }}"
+  with_random_choice: "{{ l_members }}"
+

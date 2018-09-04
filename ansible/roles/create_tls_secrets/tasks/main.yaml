@@ -1,0 +1,99 @@
+---
+- name: debug
+  debug: msg={{ _tls is not undefined and _tls.static is not undefined and _tls.static.member is not undefined }}
+- name: debug 2
+  debug: msg={{ _tls is not undefined and _tls.static is not undefined and _tls.static.operator_secret is not undefined
+                           and _tls.static.operator_secret|length > 0 }}
+
+- name: Determine if secure client
+  set_fact:
+    l_secure_client: "present"
+  when: (_tls is not undefined and _tls.static is not undefined and _tls.static.operator_secret is not undefined
+                                    and _tls.static.operator_secret|length > 0 )
+
+- name: Determine if secure peer
+  set_fact:
+    l_secure_peer: "present"
+  when: ( _tls is not undefined and _tls.static is not undefined and _tls.static.member is not undefined
+        and _tls.static.member.peer_secret|length > 0)
+
+- name: Create Etcd Peer TLS Secret
+  k8s:
+    state: "{{ l_secure_peer }}"
+    definition:
+      apiVersion: "{{ secret_api_version }}"
+      kind: Secret
+      metadata:
+        name: "{{ etcd_peer_secret_name }}"
+        namespace: "{{ l_namespace }}"
+        labels:
+          app: "{{ l_app_label }}"
+          etcd_cluster: "{{ l_cluster_name }}"
+      data:
+        "peer.key": "{{ peer_key_value }}"
+        "peer.crt": "{{ peer_crt_value }}"
+        "peer-ca.crt": "{{ peer_ca_crt_value }}"
+  when: l_secure_peer == "present"
+
+- name: Create Etcd Client TLS Secret
+  k8s:
+    state: "{{ l_secure_client }}"
+    definition:
+      apiVersion: "{{ secret_api_version }}"
+      kind: Secret
+      metadata:
+        name: "{{ etcd_client_secret_name }}"
+        namespace: "{{ l_namespace }}"
+        labels:
+          app: "{{ l_app_label }}"
+          etcd_cluster: "{{ l_cluster_name }}"
+      data:
+        "etcd-client.key": "{{ etcd_client_key_value }}"
+        "etcd-client.crt": "{{ etcd_client_crt_value }}"
+        "etcd-client-ca.crt": "{{ etcd_client_ca_crt_value }}"
+  when: l_secure_client == "present"
+
+
+- name: Create Etcd Server TLS Secret
+  k8s:
+    state: "{{ l_secure_client }}"
+    definition:
+      apiVersion: "{{ secret_api_version }}"
+      kind: Secret
+      metadata:
+        name: "{{ etcd_server_secret_name }}"
+        namespace: "{{ l_namespace }}"
+        labels:
+          app: "{{ l_app_label }}"
+          etcd_cluster: "{{ l_cluster_name }}"
+      data:
+        "server.key": "{{ etcd_server_key_value }}"
+        "server.crt": "{{ etcd_server_crt_value }}"
+        "server-ca.crt": "{{ etcd_server_ca_crt_value }}"
+  when: l_secure_client == "present"
+
+- name: Create directory for tls certs
+  file:
+    path: "/home/ansible-operator/{{ l_cluster_name }}"
+    state: directory
+    mode: "u+rw,g+rw,o+rw"
+  when: (l_secure_client == "present" or l_secure_peer == "present")
+
+- name: create etcd ca file
+  copy:
+    content: "{{ etcd_client_ca_crt_value | b64decode}}"
+    dest: "$HOME/{{ l_cluster_name }}/ca.pem"
+  when: (l_secure_client == "present" or l_secure_peer == "present")
+
+- name: create cert file
+  copy:
+    content: "{{ etcd_client_crt_value | b64decode}}"
+    dest: "$HOME/{{ l_cluster_name }}/cert.pem"
+  when: (l_secure_client == "present" or l_secure_peer == "present")
+
+- name: create key file
+  copy:
+    content: "{{ etcd_client_key_value | b64decode}}"
+    dest: "$HOME/{{ l_cluster_name }}/key.pem"
+    dest: "$HOME/{{ l_cluster_name }}/key.pem"
+  when: (l_secure_client == "present" or l_secure_peer == "present")

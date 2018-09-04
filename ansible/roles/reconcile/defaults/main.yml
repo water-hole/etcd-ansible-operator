@@ -1,0 +1,21 @@
+---
+# defaults file for etcd-ansible-operator
+
+l_new_members: []
+l_remove_members: []
+l_peer_urls: []
+l_new_peer_urls: []
+l_cluster_phase: "existing"
+l_peer_protocol: "http://"
+l_client_protocol: "http://"
+l_peer_tls_dir: "/etc/etcdtls/member/peer-tls"
+l_server_tls_dir: "/etc/etcdtls/member/server-tls"
+l_volume_mounts:
+- name: "etcd-data"
+  mountPath: "/var/etcd"
+l_volumes:
+- name: "etcd-data"
+  source:
+    emptyDir: {}
+l_peer_tls_commands: []
+l_client_tls_commands: []

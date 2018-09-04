@@ -1,0 +1,8 @@
+---
+# tasks file for etcd-ansible-operator
+- name: create services if it does not exist
+  include_tasks: create_services.yml
+  when: (l_cluster_services|length==0)
+
+- name: reconcile pods
+  include_tasks: reconcile_pods.yaml

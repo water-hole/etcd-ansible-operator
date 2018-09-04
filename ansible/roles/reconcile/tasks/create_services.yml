@@ -1,0 +1,74 @@
+---
+
+- name: define variable for members.
+  set_fact:
+    l_members: []
+    l_peer_urls: []
+    l_cluster_phase: "new"
+
+#- name: generate member names
+#  set_fact:
+#    l_members: "{{ l_members + [ l_cluster_name + '-' + 9999999|random|hash('md5')|regex_search('^.{0,10}')] }}"
+#  with_sequence: start=0 end="{{spec.size-1}}"
+
+#- name: generate member peer urls
+#  set_fact:
+#    l_peer_urls: "{{ l_peer_urls + [ item + '=http://' + item + '.' + l_cluster_name + '.' + l_namespace + '.svc:' + l_peer_port|string ] }}"
+#  loop: "{{ l_members }}"
+
+#- name: generate pod environments
+#  set_fact:
+#    pod_namespace: "{{ l_namespace }}"
+#    pod_is_secure_client: false
+#    pod_is_sercure_peer: false
+
+
+- name: create client service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ l_cluster_name }}-client"
+        namespace: "{{ l_namespace }}"
+        labels:
+          app: "{{ l_app }}"
+          etcd_cluster: "{{ l_cluster_name }}"
+      spec:
+        selector:
+          etcd_cluster: "{{ l_cluster_name }}"
+          app: "{{ l_app }}"
+        clusterIP: ""
+        ports:
+        - protocol: TCP
+          targetPort: "{{ l_client_port }}"
+          name: client
+          port: "{{ l_client_port }}"
+
+- name: create peer_service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ l_cluster_name }}"
+        namespace: "{{ l_namespace }}"
+        labels:
+          app: "{{ l_app }}"
+          etcd_cluster: "{{ l_cluster_name }}"
+      spec:
+        selector:
+          etcd_cluster: "{{ l_cluster_name }}"
+          app: "{{ l_app }}"
+        clusterIP: None
+        ports:
+        - protocol: TCP
+          targetPort: "{{ l_client_port }}"
+          name: client
+          port: "{{ l_client_port}}"
+        - protocol: TCP
+          targetPort: "{{ l_peer_port }}"
+          name: peer
+          port: "{{ l_peer_port}}"

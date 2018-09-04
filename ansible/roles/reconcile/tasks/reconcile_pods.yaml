@@ -1,0 +1,217 @@
+---
+#this task maintains members for a cluster and other commands.
+
+- name: set cluster phase
+  set_fact:
+    l_cluster_phase: "new"
+  when: (l_cluster_services|length == 0)
+
+- name: set cluster member fact from lookup if single pod
+  set_fact:
+    l_members: "{{ [l_cluster_pods.metadata.name]}}"
+  when: l_cluster_pods.status is not undefined and l_cluster_pods.status == "Running"
+
+
+- name: set cluster member fact from lookup if multiple pods
+  set_fact:
+    l_members: "{{ l_cluster_pods | selectattr('status.phase', 'match', 'Running') | map(attribute='metadata.name') | list }}"
+  when: l_cluster_pods is defined and l_cluster_pods.status is undefined
+
+- name: set failed cluster member fact from lookup
+  set_fact:
+    l_failed_members: "{{ l_cluster_pods | map(attribute='metadata.name') | list | difference(l_members)}}"
+
+- name: debug
+  debug: msg={{l_members|length, size}}
+
+- name: generate names when cluster is expanding
+  include_tasks: generate_names.yaml
+  when: (l_members|length < size)
+
+- name: remote member names when cluster is contracting
+  include_tasks: remove_member.yaml
+  when: (l_members|length>size)
+
+- name: set variables if peer is secure
+  set_fact:
+    l_peer_protocol: "https://"
+  when: (l_secure_peer == "present")
+
+- name: set variables if client is secure
+  set_fact:
+    l_client_protocol: "https://"
+  when: (l_secure_client == "present")
+
+- name: generate new member peer urls
+  set_fact:
+    l_new_peer_urls: "{{ l_new_peer_urls + [ item + '='  + l_peer_protocol + '' + item + '.' + l_cluster_name + '.' + l_namespace + '.svc:' + l_peer_port|string ] }}"
+  loop: "{{ l_new_members }}"
+
+- name: generate member peer urls
+  set_fact:
+    l_peer_urls: "{{ l_peer_urls + [ item + '=' + l_peer_protocol + '' + item + '.' + l_cluster_name + '.' + l_namespace + '.svc:' + l_peer_port|string ] }}"
+  loop: "{{ l_members + l_new_members}}"
+
+- name: generate pod environments
+  set_fact:
+    pod_namespace: "{{ l_namespace }}"
+    pod_is_secure_client: false
+    pod_is_sercure_peer: false
+
+- name: set cluster token
+  set_fact:
+    l_token: "{{ l_cluster_name | hash('md5') }}"
+
+#--peer-client-cert-auth=true --peer-trusted-ca-file=%[1]s/peer-ca.crt --peer-cert-file=%[1]s/peer.crt --peer-key-file=%[1]s/peer.key
+- name: add peer tls commands
+  set_fact:
+    l_peer_tls_commands: "['--peer-client-cert-auth=true'] +
+                          ['--peer-trusted-ca-file={{ l_peer_tls_dir }}/peer-ca.crt'] +
+                          ['--peer-cert-file={{ l_peer_tls_dir }}/peer.crt'] +
+                          ['--peer-key-file={{ l_peer_tls_dir }}/peer.key']"
+  when: l_secure_peer == "present"
+
+- name: add client tls commands
+  set_fact:
+    l_client_tls_commands: "['--client-cert-auth=true'] +
+                            ['--trusted-ca-file={{ l_server_tls_dir }}/server-ca.crt'] +
+                            ['--cert-file={{ l_server_tls_dir }}/server.crt'] +
+                            ['--key-file={{ l_server_tls_dir }}/server.key']"
+  when: l_secure_client == "present"
+
+
+- name: echo members of cluster
+  vars:
+    members: "{{ lookup('etcd_member', cluster_host= l_cluster_name + '.' + l_namespace + '.svc',
+                  cluster_port= l_client_port) }}"
+  set_fact:
+    l_cluster_members: "{{ members }}"
+  when: (l_cluster_phase == "existing")
+
+
+- name: Get the members to be removed from the etcd cluster
+  set_fact:
+    remove_members_names: "{{ l_cluster_members | map(attribute='name') | list | difference(l_members)}}"
+    remove_members_ids: []
+  when: l_cluster_members is not undefined
+
+
+- name: set the ids of members to be removed from etcd cluster
+  when: l_cluster_members is not undefined
+  set_fact:
+    remove_members_ids: "{{ remove_members_ids + l_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list }}"
+  loop: "{{ remove_members_names }}"
+
+
+- name: remove members from etcd cluster
+  when: l_cluster_members is not undefined
+  etcd_member:
+    state: "absent"
+    cluster_host: "{{ l_cluster_name + '.' + l_namespace + '.svc'}}"
+    cluster_port: "{{ l_client_port }}"
+    id: "{{ item }}"
+  loop: "{{ remove_members_ids }}"
+
+
+- name: set volumes and volumeMounts for secure peer
+  set_fact:
+    l_volume_mounts: "{{ l_volume_mounts }} +
+                      [{'name':'member-peer-tls',
+                        'mountPath':'/etc/etcdtls/member/peer-tls'}]"
+    l_volumes: "{{ l_volumes }} +
+                [{'name': 'member-peer-tls',
+                  'secret': {'secretName': '{{ TLS.static.member.peerSecret }}' }}]"
+  when: l_secure_peer == "present"
+
+
+- name: set volumes and volumeMounts for secure client
+  set_fact:
+    l_volume_mounts: "{{ l_volume_mounts }} +
+                      [{'name':'member-server-tls',
+                      'mountPath':'/etc/etcdtls/member/server-tls'}] +
+                      [{'name':'member-client-tls',
+                        'mountPath':'/etc/etcdtls/member/etcd-tls'}]"
+    l_volumes: "{{ l_volumes }} +
+                 [{'name': 'member-server-tls',
+                   'secret': {'secretName': '{{ TLS.static.member.serverSecret }}' }}] +
+                 [{'name': 'member-client-tls',
+                   'secret': {'secretName': '{{ TLS.static.operatorSecret }}' }}]"
+  when: l_secure_client == "present"
+
+- name: add new members in cluster
+  when: l_cluster_phase == "existing"
+  etcd_member:
+    state: "present"
+    cluster_host: "{{ l_cluster_name + '-client.' + l_namespace + '.svc'}}"
+    cluster_port: "{{ l_client_port }}"
+    name: "{{ item }}"
+    peer_urls: "{{ l_peer_protocol + '' + item + '.' + l_cluster_name + '.' + l_namespace + '.svc:' + l_peer_port|string }}"
+  loop: "{{ l_new_members }}"
+
+- name: create new pods
+  vars:
+  - sleep_time: "1"
+    pod_name: "{{ item }}"
+    exec_command: " {% raw %} while true; do echo {% endraw %}
+                    {{ item + '.' + l_cluster_name + '.' + l_namespace + '.svc' }}
+                    {% raw %}; sleep {% endraw %}
+                    {{ sleep_time }}
+                    {%raw %}; done {% endraw %}"
+    init_command: " {% raw %} TIMEOUT_READY=0 ;while ( ! nslookup {% endraw %}
+                    {{ item + '.' + l_cluster_name + '.' + l_namespace + '.svc' }}
+                    {% raw %}
+                      )
+                      do
+                          TIMEOUT_READY=$(( TIMEOUT_READY-1 ))
+                          if [ $TIMEOUT_READY -eq 0 ];
+                          then
+                              echo Timed out waiting for DNS entry
+                              exit 1
+                          fi
+                          sleep 1
+                      done
+                    {% endraw %}"
+    l_peer_url: "{{l_peer_protocol + '' + item + '.' + l_cluster_name + '.' + l_namespace + '.svc:' + l_peer_port|string }}"
+    l_client_url: "{{l_client_protocol + '' + item + '.' + l_cluster_name + '.' + l_namespace + '.svc:' + l_client_port|string }}"
+    l_listen_peer_url: "{{ l_peer_protocol }}{% raw %}0.0.0.0:{% endraw %}{{ l_peer_port|string }}"
+    l_listen_client_url: "{{ l_client_protocol }}{% raw %}0.0.0.0:{% endraw %}{{ l_client_port|string }}"
+    l_data_dir: "/var/etcd/data"
+    l_cmd:
+      - "{% raw %}/usr/local/bin/etcd{% endraw %}"
+      - "{% raw %}--data-dir={% endraw %}{{ l_data_dir }}"
+      - "{% raw %}--name={% endraw %}{{ pod_name }}"
+      - "{% raw %}--initial-advertise-peer-urls={% endraw %}{{ l_peer_url }}"
+      - "{% raw %}--listen-peer-urls={% endraw %}{{ l_listen_peer_url }}"
+      - "{% raw %}--listen-client-urls={% endraw %}{{ l_listen_client_url}}"
+      - "{% raw %}--advertise-client-urls={% endraw %}{{l_client_url}}"
+      - "{% raw %}--initial-cluster={% endraw %}{{l_peer_urls|join(',')}}"
+      - "{% raw %}--initial-cluster-state={% endraw %}{{ l_cluster_phase }}"
+      - "{% raw %}--initial-cluster-token={% endraw %}{{l_token}}"
+    l_command: "{{ l_cmd }} + {{ l_peer_tls_commands }} + {{ l_client_tls_commands }}"
+  include_tasks: create_pod.yaml
+  loop: "{{ l_new_members }}"
+
+- name: pick a member to remove if cluster is contracting
+  when: (l_cluster_members is not undefined and size < l_cluster_members|length)
+  set_fact:
+    l_remove_member: "{{ item }}"
+  with_random_choice: "{{ l_cluster_members }}"
+
+- name: remove the member from etcd cluster
+  etcd_member:
+    state: "absent"
+    cluster_host: "{{ l_cluster_name + '.' + l_namespace + '.svc'}}"
+    cluster_port: "{{ l_client_port }}"
+    id: "{{ l_remove_member.id }}"
+  when: l_remove_member is not undefined
+
+- name: kill the pod
+  k8s:
+    state: absent
+    definition:
+      apiVersion: "v1"
+      kind: "Pod"
+      metadata:
+        name: "{{ l_remove_member.name }}"
+        namespace: "{{ l_namespace }}"
+  when: l_remove_member is not undefined

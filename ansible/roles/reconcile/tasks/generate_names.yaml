@@ -1,0 +1,15 @@
+---
+- name: set new members empty list
+  set_fact:
+    l_new_members: []
+
+- name: generate member names if cluster is new
+  when: l_cluster_phase == "new"
+  set_fact:
+    l_new_members: "{{ l_new_members + [l_cluster_name + '-' + 9999999|random|hash('md5')|regex_search('^.{0,10}')] }}"
+  with_sequence: start={{l_members|length}} end={{size - 1}}
+
+- name: generate member names if cluster is expanding
+  set_fact:
+    l_new_members: "{{ [l_cluster_name + '-' + 9999999|random|hash('md5')|regex_search('^.{0,10}')] }}"
+  when: l_cluster_phase == "existing"

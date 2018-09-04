@@ -1,0 +1,47 @@
+---
+# Steps for making a pod join a cluster
+# 1. generate a pod name
+# 2. get list of client urls. Format: %s.%s.%s.svc - pod-name.cluster-name.namespace.svc
+# 3. get list of peer urls. Format: %s=%s.%s.%s.svc pod-name=pod-name.cluster-name.namespace.svc,
+# 4. listen client url for new client = http(s)://0.0.0.0:2379
+# 5. listen peer url for new client = http(s)://0.0.0.0:2380
+- name: create pods.
+  k8s:
+    state: present
+    definition:
+      apiVersion: "v1"
+      kind: "Pod"
+      metadata:
+        name: "{{pod_name}}"
+        namespace: "{{l_namespace}}"
+        labels:
+          app: "{{ l_app }}"
+          etcd_cluster: "{{ l_cluster_name }}"
+          etcd_node: "{{pod_name}}"
+      spec:
+        hostname: "{{ pod_name }}"
+        subdomain: "{{ l_cluster_name }}"
+        initConatiners:
+        - name: "check-dns"
+          image: "busybox:1.28.0-glibc"
+          command: ["/bin/sh"]
+          args:
+          - "-c"
+          - "{{init_command}}"
+        containers:
+        - name: "etcd"
+#        TODO: make it generic i.e. repository:vversion
+          image: "quay.io/coreos/etcd:v3.2.13"
+          command: "{{ l_command }}"
+          ports:
+          - containerPort: "{{l_client_port}}"
+            name: "server"
+            protocol: "TCP"
+          - containerPort: "{{l_peer_port}}"
+            name: "client"
+            protocol: "TCP"
+          volumeMounts: "{{ l_volume_mounts }}"
+        volumes: "{{ l_volumes }}"
+
+        restartPolicy: "Never"
+        automationServiceAccountToker: false
