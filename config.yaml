@@ -1,6 +1,5 @@
 ---
-- name: Ansible-vault
-  version: v1beta2
+- version: v1beta2
   group: etcd.database.coreos.com
   kind: EtcdCluster
-  path: /opt/ansible/playbook.yaml
+  playbook: /opt/ansible/playbook.yaml
