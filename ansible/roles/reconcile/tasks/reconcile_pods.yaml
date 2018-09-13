@@ -21,6 +21,40 @@
   set_fact:
     l_failed_members: "{{ l_cluster_pods | map(attribute='metadata.name') | list | difference(l_members)}}"
 
+
+- name: set members of cluster
+  vars:
+    members: "{{ lookup('etcd_member', cluster_host= l_cluster_name + '.' + l_namespace + '.svc',
+                  cluster_port= l_client_port) }}"
+  set_fact:
+    l_cluster_members: "{{ members }}"
+  when: (l_cluster_phase == "existing")
+
+
+- name: Get the members to be removed from the etcd cluster
+  set_fact:
+    remove_members_names: "{{ l_cluster_members | map(attribute='name') | list | difference(l_members)}}"
+    remove_members_ids: []
+  when: l_cluster_members is not undefined
+
+
+- name: set the ids of members to be removed from etcd cluster
+  when: l_cluster_members is not undefined
+  set_fact:
+    remove_members_ids: "{{ remove_members_ids + l_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list }}"
+  loop: "{{ remove_members_names }}"
+
+
+- name: remove members from etcd cluster
+  when: l_cluster_members is not undefined
+  etcd_member:
+    state: "absent"
+    cluster_host: "{{ l_cluster_name + '.' + l_namespace + '.svc'}}"
+    cluster_port: "{{ l_client_port }}"
+    id: "{{ item }}"
+  loop: "{{ remove_members_ids }}"
+
+
 - name: debug
   debug: msg={{l_members|length, size}}
 
@@ -78,39 +112,6 @@
                             ['--cert-file={{ l_server_tls_dir }}/server.crt'] +
                             ['--key-file={{ l_server_tls_dir }}/server.key']"
   when: l_secure_client == "present"
-
-
-- name: echo members of cluster
-  vars:
-    members: "{{ lookup('etcd_member', cluster_host= l_cluster_name + '.' + l_namespace + '.svc',
-                  cluster_port= l_client_port) }}"
-  set_fact:
-    l_cluster_members: "{{ members }}"
-  when: (l_cluster_phase == "existing")
-
-
-- name: Get the members to be removed from the etcd cluster
-  set_fact:
-    remove_members_names: "{{ l_cluster_members | map(attribute='name') | list | difference(l_members)}}"
-    remove_members_ids: []
-  when: l_cluster_members is not undefined
-
-
-- name: set the ids of members to be removed from etcd cluster
-  when: l_cluster_members is not undefined
-  set_fact:
-    remove_members_ids: "{{ remove_members_ids + l_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list }}"
-  loop: "{{ remove_members_names }}"
-
-
-- name: remove members from etcd cluster
-  when: l_cluster_members is not undefined
-  etcd_member:
-    state: "absent"
-    cluster_host: "{{ l_cluster_name + '.' + l_namespace + '.svc'}}"
-    cluster_port: "{{ l_client_port }}"
-    id: "{{ item }}"
-  loop: "{{ remove_members_ids }}"
 
 
 - name: set volumes and volumeMounts for secure peer
