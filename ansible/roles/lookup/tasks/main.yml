@@ -5,10 +5,6 @@
     l_namespace: "{{ meta.namespace }}"
   when: meta.namespace is not undefined
 
-- name: set app label
-  set_fact:
-    l_app: etcd
-
 - name: set cluster name label
   set_fact:
     l_cluster_name: "{{ meta.name }}"

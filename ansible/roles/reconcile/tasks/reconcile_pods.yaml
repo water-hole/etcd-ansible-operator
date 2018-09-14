@@ -35,13 +35,14 @@
   set_fact:
     remove_members_names: "{{ l_cluster_members | map(attribute='name') | list | difference(l_members)}}"
     remove_members_ids: []
-  when: l_cluster_members is not undefined
+  when: l_cluster_members is defined
 
 
 - name: set the ids of members to be removed from etcd cluster
-  when: l_cluster_members is not undefined
+  when: l_cluster_members is defined
   set_fact:
     remove_members_ids: "{{ remove_members_ids + l_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list }}"
+    l_remove_pods: "{{ l_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list | difference(l_members+l_failed_members) }}"
   loop: "{{ remove_members_names }}"
 
 
@@ -206,13 +207,18 @@
     id: "{{ l_remove_member.id }}"
   when: l_remove_member is not undefined
 
-- name: kill the pod
+- name: add the extra member to remove pods
+  set_fact:
+    l_remove_pods: "{{ l_remove_pods + [l_remove_member.name] }}"
+  when: l_remove_member is not undefined
+
+- name: kill the pods
   k8s:
     state: absent
     definition:
       apiVersion: "v1"
       kind: "Pod"
       metadata:
-        name: "{{ l_remove_member.name }}"
+        name: "{{ item }}"
         namespace: "{{ l_namespace }}"
-  when: l_remove_member is not undefined
+  loop: "{{ l_remove_pods }}"

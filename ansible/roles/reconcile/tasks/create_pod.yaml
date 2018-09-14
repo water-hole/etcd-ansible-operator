@@ -15,7 +15,7 @@
         name: "{{pod_name}}"
         namespace: "{{l_namespace}}"
         labels:
-          app: "{{ l_app }}"
+          app: "{{ l_app_label }}"
           etcd_cluster: "{{ l_cluster_name }}"
           etcd_node: "{{pod_name}}"
       spec:

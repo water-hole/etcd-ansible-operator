@@ -1,6 +1,22 @@
 ---
 # defaults file for etcd-ansible-operator
 
+
+l_namespace: "{{ meta.namespace }}"
+l_client_port: 2379
+l_peer_port: 2380
+l_app_label: "etcd"
+l_cluster_name: "example-etcd-cluster"
+l_cluster_pods: []
+l_volume_mounts:
+- name: "etcd-data"
+  mountPath: "/var/etcd"
+l_volumes:
+- name: "etcd-data"
+  source:
+    emptyDir: {}
+
+
 l_new_members: []
 l_remove_members: []
 l_peer_urls: []
@@ -19,3 +35,7 @@ l_volumes:
     emptyDir: {}
 l_peer_tls_commands: []
 l_client_tls_commands: []
+
+l_secure_client: "absent"
+l_secure_peer: "absent"
+l_remove_pods: []

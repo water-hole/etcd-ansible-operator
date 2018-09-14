@@ -9,20 +9,3 @@
 #      peer_secret: etcd-peer-tls
 #      server_secret: etcd-server-tls
 #    operator_secret: etcd-client-tls
-
-l_namespace: "{{ meta.namespace }}"
-l_client_port: 2379
-l_peer_port: 2380
-l_app_label: "etcd"
-l_cluster_name: "example-etcd-cluster"
-l_cluster_pods: []
-l_volume_mounts:
-- name: "etcd-data"
-  mountPath: "/var/etcd"
-l_volumes:
-- name: "etcd-data"
-  source:
-    emptyDir: {}
-
-l_secure_client: "absent"
-l_secure_peer: "absent"

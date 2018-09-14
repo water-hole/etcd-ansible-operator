@@ -1,5 +1,19 @@
 ---
 # tasks file for etcd-ansible-operator
+
+- name: Determine if secure client
+  set_fact:
+    l_secure_client: "present"
+  when: (_tls is not undefined and _tls.static is not undefined and _tls.static.operator_secret is not undefined
+                                    and _tls.static.operator_secret|length > 0 )
+
+- name: Determine if secure peer
+  set_fact:
+    l_secure_peer: "present"
+  when: ( _tls is not undefined and _tls.static is not undefined and _tls.static.member is not undefined
+        and _tls.static.member.peer_secret|length > 0)
+
+
 - name: create services if it does not exist
   include_tasks: create_services.yml
   when: (l_cluster_services|length==0)

@@ -33,12 +33,12 @@
         name: "{{ l_cluster_name }}-client"
         namespace: "{{ l_namespace }}"
         labels:
-          app: "{{ l_app }}"
+          app: "{{ l_app_label }}"
           etcd_cluster: "{{ l_cluster_name }}"
       spec:
         selector:
           etcd_cluster: "{{ l_cluster_name }}"
-          app: "{{ l_app }}"
+          app: "{{ l_app_label }}"
         clusterIP: ""
         ports:
         - protocol: TCP
@@ -56,12 +56,12 @@
         name: "{{ l_cluster_name }}"
         namespace: "{{ l_namespace }}"
         labels:
-          app: "{{ l_app }}"
+          app: "{{ l_app_label }}"
           etcd_cluster: "{{ l_cluster_name }}"
       spec:
         selector:
           etcd_cluster: "{{ l_cluster_name }}"
-          app: "{{ l_app }}"
+          app: "{{ l_app_label }}"
         clusterIP: None
         ports:
         - protocol: TCP
