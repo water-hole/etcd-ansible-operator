@@ -46,7 +46,7 @@
   loop: "{{ remove_members_names }}"
 
 
-- name: remove members from etcd cluster
+- name: remove members from etcd cluster that are not running
   when: etcd_cluster_members is not undefined
   etcd_member:
     state: "absent"
@@ -55,17 +55,9 @@
     id: "{{ item }}"
   loop: "{{ remove_members_ids }}"
 
-
-- name: debug
-  debug: msg={{etcd_members|length, size}}
-
 - name: generate names when cluster is expanding
   include_tasks: generate_names.yaml
   when: (etcd_members|length < size)
-
-- name: remote member names when cluster is contracting
-  include_tasks: remove_member.yaml
-  when: (etcd_members|length>size)
 
 - name: set variables if peer is secure
   set_fact:
@@ -77,28 +69,16 @@
     etcd_client_protocol: "https://"
   when: (etcd_secure_client == "present")
 
-- name: generate new member peer urls
-  set_fact:
-    etcd_new_peer_urls: "{{ etcd_new_peer_urls + [ item + '='  + etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc:' + etcd_peer_port|string ] }}"
-  loop: "{{ etcd_new_members }}"
-
 - name: generate member peer urls
   set_fact:
     etcd_peer_urls: "{{ etcd_peer_urls + [ item + '=' + etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc:' + etcd_peer_port|string ] }}"
   loop: "{{ etcd_members + etcd_new_members}}"
 
-- name: generate pod environments
-  set_fact:
-    pod_namespace: "{{ etcd_namespace }}"
-    pod_is_secure_client: false
-    pod_is_sercure_peer: false
-
 - name: set cluster token
   set_fact:
     etcd_token: "{{ etcd_cluster_name | hash('md5') }}"
 
-#--peer-client-cert-auth=true --peer-trusted-ca-file=%[1]s/peer-ca.crt --peer-cert-file=%[1]s/peer.crt --peer-key-file=%[1]s/peer.key
-- name: add peer tls commands
+- name: set peer tls commands
   set_fact:
     etcd_peer_tls_commands: "['--peer-client-cert-auth=true'] +
                           ['--peer-trusted-ca-file={{ etcd_peer_tls_dir }}/peer-ca.crt'] +
@@ -106,7 +86,7 @@
                           ['--peer-key-file={{ etcd_peer_tls_dir }}/peer.key']"
   when: etcd_secure_peer == "present"
 
-- name: add client tls commands
+- name: set client tls commands
   set_fact:
     etcd_client_tls_commands: "['--client-cert-auth=true'] +
                             ['--trusted-ca-file={{ etcd_server_tls_dir }}/server-ca.crt'] +

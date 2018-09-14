@@ -1,7 +1,0 @@
----
-- name: pick a member to remove
-  set_fact:
-    etcd_remove_members: "{{ [item] }}"
-    etcd_members: "{{ etcd_members | difference(item) }}"
-  with_random_choice: "{{ etcd_members }}"
-
