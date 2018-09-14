@@ -9,7 +9,7 @@ COPY etcd-modules/etcd_member_lookup.py /lib/python2.7/site-packages/ansible/plu
 RUN useradd -u ${USER_UID} ${USER_NAME}
 USER ${USER_NAME}
 
-ENV RESYNC_PERIOD=5
+ENV RESYNC_PERIOD=8
 COPY ansible/roles/ ${HOME}/roles/
 COPY ansible/playbook.yaml ${HOME}/playbook.yaml
 COPY config.yaml ${HOME}/watches.yaml

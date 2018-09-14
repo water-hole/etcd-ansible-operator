@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a366c59e-36bd-401b-bd4f-a64d69a14c3f" name="Default" comment="Refactor">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/etcd-modules/etcd_member.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/etcd-modules/etcd_member_lookup.py" />
+    <list default="true" id="a366c59e-36bd-401b-bd4f-a64d69a14c3f" name="Default" comment="Add module and plugin to current ansible">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Dockerfile" afterPath="$PROJECT_DIR$/Dockerfile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile_pods.yaml" afterPath="$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile_pods.yaml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,8 +20,8 @@
       <file leaf-file-name="create_pod.yaml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_pod.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="7" column="19" lean-forward="false" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+            <state relative-caret-position="278">
+              <caret line="17" column="24" lean-forward="false" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -33,8 +30,8 @@
       <file leaf-file-name="main.yml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/main.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="3" lean-forward="false" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
+            <state relative-caret-position="57">
+              <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -43,78 +40,78 @@
       <file leaf-file-name="main.yaml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ansible/roles/create_tls_secrets/tasks/main.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1862">
-              <caret line="98" column="40" lean-forward="false" selection-start-line="98" selection-start-column="40" selection-end-line="98" selection-end-column="40" />
+            <state relative-caret-position="19">
+              <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="17" selection-end-column="54" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Dockerfile" pinned="false" current-in-tab="false">
+      <file leaf-file-name="playbook.yaml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ansible/playbook.yaml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="152">
+              <caret line="8" column="11" lean-forward="false" selection-start-line="8" selection-start-column="11" selection-end-line="8" selection-end-column="11" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.yml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/defaults/main.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="582">
+              <caret line="40" column="17" lean-forward="false" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Dockerfile" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Dockerfile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+            <state relative-caret-position="209">
+              <caret line="11" column="19" lean-forward="false" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="rbac.yaml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/deploy/rbac.yaml">
+      <file leaf-file-name="main.yaml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ansible/roles/create_tls_secrets/defaults/main.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="513">
-              <caret line="27" column="15" lean-forward="false" selection-start-line="27" selection-start-column="15" selection-end-line="27" selection-end-column="15" />
+            <state relative-caret-position="551">
+              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="operator.yaml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/deploy/operator.yaml">
+      <file leaf-file-name="all.yaml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ansible/group_vars/all.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="57">
-              <caret line="3" column="13" lean-forward="false" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
+            <state relative-caret-position="209">
+              <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="generate_names.yaml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/generate_names.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="114">
-              <caret line="6" column="32" lean-forward="false" selection-start-line="6" selection-start-column="32" selection-end-line="6" selection-end-column="32" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="reconcile_pods.yaml" pinned="false" current-in-tab="true">
+      <file leaf-file-name="reconcile_pods.yaml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile_pods.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="55" column="0" lean-forward="false" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
+            <state relative-caret-position="468">
+              <caret line="221" column="23" lean-forward="false" selection-start-line="221" selection-start-column="23" selection-end-line="221" selection-end-column="23" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="etcd_member.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/etcd-modules/etcd_member.py">
+      <file leaf-file-name="create_services.yml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_services.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="282">
-              <caret line="162" column="29" lean-forward="false" selection-start-line="162" selection-start-column="29" selection-end-line="162" selection-end-column="29" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="etcd_member_lookup.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/etcd-modules/etcd_member_lookup.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="557">
-              <caret line="44" column="0" lean-forward="true" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
+            <state relative-caret-position="316">
+              <caret line="63" column="24" lean-forward="false" selection-start-line="63" selection-start-column="24" selection-end-line="63" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -151,12 +148,15 @@
       <find>lookup</find>
       <find>generate</find>
       <find>l_new_members</find>
+      <find>l_</find>
+      <find>l_app</find>
     </findStrings>
     <replaceStrings>
       <replace>l_namespace</replace>
       <replace>l_secure_client</replace>
       <replace>l_secure_peer</replace>
       <replace />
+      <replace>l_app_label</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/ansible</dir>
@@ -185,31 +185,31 @@
         <option value="$PROJECT_DIR$/.Dockerfile" />
         <option value="$PROJECT_DIR$/deploy/crd.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/main.yml" />
         <option value="$PROJECT_DIR$/ansible/roles/lookup/tasks/generate_names.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/lookup/tasks/remove_names.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_services.yml" />
         <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/add_members.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/remove_names.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/defaults/main.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/lookup/defaults/main.yml" />
-        <option value="$PROJECT_DIR$/config.yaml" />
-        <option value="$PROJECT_DIR$/deploy/rbac.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/lookup/tasks/main.yml" />
-        <option value="$PROJECT_DIR$/ansible/playbook.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/create_tls_secrets/defaults/main.yaml" />
         <option value="$PROJECT_DIR$/deploy/cr.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/create_tls_secrets/tasks/main.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/remove_member.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/reconcile/defaults/main.yml" />
-        <option value="$PROJECT_DIR$/deploy/operator.yaml" />
-        <option value="$PROJECT_DIR$/ansible/group_vars/all.yaml" />
         <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/generate_names.yaml" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_1.yml" />
-        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_pod.yaml" />
-        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile_pods.yaml" />
         <option value="$PROJECT_DIR$/etcd-modules/etcd_member.py" />
         <option value="$PROJECT_DIR$/etcd-modules/etcd_member_lookup.py" />
+        <option value="$PROJECT_DIR$/deploy/operator.yaml" />
+        <option value="$PROJECT_DIR$/deploy/rbac.yaml" />
+        <option value="$PROJECT_DIR$/config.yaml" />
+        <option value="$PROJECT_DIR$/ansible/playbook.yaml" />
+        <option value="$PROJECT_DIR$/ansible/roles/lookup/tasks/main.yml" />
+        <option value="$PROJECT_DIR$/ansible/roles/lookup/defaults/main.yml" />
+        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_services.yml" />
+        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_pod.yaml" />
+        <option value="$PROJECT_DIR$/ansible/group_vars/all.yaml" />
+        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/main.yml" />
+        <option value="$PROJECT_DIR$/ansible/roles/create_tls_secrets/defaults/main.yaml" />
+        <option value="$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile_pods.yaml" />
+        <option value="$PROJECT_DIR$/ansible/roles/reconcile/defaults/main.yml" />
         <option value="$PROJECT_DIR$/Dockerfile" />
       </list>
     </option>
@@ -220,7 +220,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" fullScreen="true">
     <option name="y" value="22" />
     <option name="width" value="1680" />
     <option name="height" value="1028" />
@@ -293,84 +293,6 @@
             <path>
               <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
               <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="group_vars" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="create_tls_secrets" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="create_tls_secrets" type="462c0819:PsiDirectoryNode" />
-              <item name="defaults" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="create_tls_secrets" type="462c0819:PsiDirectoryNode" />
-              <item name="tasks" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="lookup" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="lookup" type="462c0819:PsiDirectoryNode" />
-              <item name="defaults" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="reconcile" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="reconcile" type="462c0819:PsiDirectoryNode" />
-              <item name="defaults" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
-              <item name="ansible" type="462c0819:PsiDirectoryNode" />
-              <item name="roles" type="462c0819:PsiDirectoryNode" />
-              <item name="reconcile" type="462c0819:PsiDirectoryNode" />
-              <item name="tasks" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="etcd-ansible-operator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="etcd-ansible-operator" type="462c0819:PsiDirectoryNode" />
               <item name="deploy" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -402,7 +324,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
     <property name="jdk.selected.JAVA_MODULE" value="9.0" />
-    <property name="SearchEverywhereHistoryKey" value="peer_urls&#9;null&#9;null" />
+    <property name="SearchEverywhereHistoryKey" value="scrat&#9;FILE&#9;file:///Users/alay/Library/Preferences/IntelliJIdea2017.2/scratches/scratch_1.yml&#10;kubeconfig&#9;null&#9;null&#10;peer_urls&#9;null&#9;null" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$2/Languages" value="yaml" />
     <property name="GO_FMT" value="false" />
   </component>
@@ -539,7 +461,7 @@
       <workItem from="1535644847930" duration="3038000" />
       <workItem from="1536092433827" duration="14226000" />
       <workItem from="1536853582491" duration="8061000" />
-      <workItem from="1536867441211" duration="435000" />
+      <workItem from="1536867441211" duration="489000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <created>1536866763828</created>
@@ -548,39 +470,62 @@
       <option name="project" value="LOCAL" />
       <updated>1536866763828</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Add module and plugin to current ansible">
+      <created>1536868120307</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1536868120307</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Refactor RBAC and config.yaml">
+      <created>1536871678739</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1536871678739</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Refactor for ansible-operator with controller runtime">
+      <created>1536888788058</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1536888788058</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="112879000" />
+    <option name="totallyTimeSpent" value="122078000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1680" height="1028" extended-state="0" />
+    <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Key Promoter X" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.34832636" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.265" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32968035" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18333334" sideWeight="0.496" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3496638" sideWeight="0.504" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34832636" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.253" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18333334" sideWeight="0.496" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3496638" sideWeight="0.504" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -625,19 +570,31 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit" />
+    <MESSAGE value="Add module and plugin to current ansible" />
+    <MESSAGE value="Refactor RBAC and config.yaml" />
+    <MESSAGE value="Refactor for ansible-operator with controller runtime" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor for ansible-operator with controller runtime" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/ansible/roles/lookup/tasks/create_services.yml" />
     <entry file="file://$PROJECT_DIR$/etcd-ansible-operator.iml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -723,20 +680,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="76">
-          <caret line="4" column="19" lean-forward="false" selection-start-line="4" selection-start-column="19" selection-end-line="4" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_services.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="11" column="33" lean-forward="false" selection-start-line="11" selection-start-column="33" selection-end-line="11" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ansible/roles/lookup/README.md" />
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
@@ -748,25 +691,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/lookup/tasks/main.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="24" column="97" lean-forward="false" selection-start-line="24" selection-start-column="97" selection-end-line="24" selection-end-column="97" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.yml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/playbook.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="23" lean-forward="false" selection-start-line="8" selection-start-column="23" selection-end-line="8" selection-end-column="23" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -785,29 +713,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/lookup/defaults/main.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/create_tls_secrets/defaults/main.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/defaults/main.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="20" column="25" lean-forward="false" selection-start-line="20" selection-start-column="25" selection-end-line="20" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/remove_member.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="76">
@@ -816,64 +721,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/create_tls_secrets/tasks/main.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1862">
-          <caret line="98" column="40" lean-forward="false" selection-start-line="98" selection-start-column="40" selection-end-line="98" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="20" column="11" lean-forward="false" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/deploy/rbac.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="27" column="15" lean-forward="false" selection-start-line="27" selection-start-column="15" selection-end-line="27" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/deploy/operator.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="57">
-          <caret line="3" column="13" lean-forward="false" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/generate_names.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
           <caret line="6" column="32" lean-forward="false" selection-start-line="6" selection-start-column="32" selection-end-line="6" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/group_vars/all.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_pod.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" column="19" lean-forward="false" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/main.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="3" lean-forward="false" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
           <folding />
         </state>
       </provider>
@@ -894,18 +745,138 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Dockerfile">
+    <entry file="file://$PROJECT_DIR$/deploy/operator.yaml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+        <state relative-caret-position="304">
+          <caret line="16" column="67" lean-forward="false" selection-start-line="16" selection-start-column="67" selection-end-line="16" selection-end-column="67" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_2.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="355">
+          <caret line="33" column="3" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="45" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/deploy/rbac.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="34" column="3" lean-forward="true" selection-start-line="34" selection-start-column="3" selection-end-line="34" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="76">
+          <caret line="4" column="33" lean-forward="false" selection-start-line="4" selection-start-column="33" selection-end-line="4" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/lookup/tasks/main.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="20" column="20" lean-forward="false" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/lookup/defaults/main.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="133">
+          <caret line="7" column="18" lean-forward="true" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_services.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="316">
+          <caret line="63" column="24" lean-forward="false" selection-start-line="63" selection-start-column="24" selection-end-line="63" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/group_vars/all.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/playbook.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" column="11" lean-forward="false" selection-start-line="8" selection-start-column="11" selection-end-line="8" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/create_tls_secrets/tasks/main.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="17" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/main.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="57">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/create_tls_secrets/defaults/main.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="551">
+          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/reconcile_pods.yaml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="55" column="0" lean-forward="false" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
+        <state relative-caret-position="468">
+          <caret line="221" column="23" lean-forward="false" selection-start-line="221" selection-start-column="23" selection-end-line="221" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/defaults/main.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="582">
+          <caret line="40" column="17" lean-forward="false" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ansible/roles/reconcile/tasks/create_pod.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="278">
+          <caret line="17" column="24" lean-forward="false" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Dockerfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="11" column="19" lean-forward="false" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
           <folding />
         </state>
       </provider>
