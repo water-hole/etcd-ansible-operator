@@ -54,6 +54,19 @@ This operator implements the [etcd-operator](https://github.com/coreos/etcd-oper
     example-etcd-cluster-a3f3b02a1b   1/1       Running   0          18s
     example-etcd-cluster-e43636bc7c   1/1       Running   0          18m
     ```
+#### Accessing the etcd cluster
+
+If you are using minikube:
+
+1. Create a service to access etcd cluster from outside the cluster by `kubectl create -f https://raw.githubusercontent.com/coreos/etcd-operator/master/example/example-etcd-cluster-nodeport-service.json`
+2. Install [etcdctl](https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html)
+3. Set etcd version `export ETCDCTL_API=3`
+4. Set etcd endpoint `export ETCDCTL_ENDPOINTS=$(minikube service example-etcd-cluster-client-service --url)`
+5. Set a key in etcd `etcdctl put hello world`
+
+If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-client.<namespace>.svc:2379` and it should work. If you are using secure client, use `https` protocol for the endpoint.
+
+
 #### Check failure recovery
 1. Bring a cluster up.
 2. Delete a pod to simulate a failure `kubectl delete pod example-etcd-cluster-1a7d2c2f8b`
@@ -65,8 +78,13 @@ This operator implements the [etcd-operator](https://github.com/coreos/etcd-oper
        example-etcd-cluster-25f6bd225a   1/1       Running   0          8s
        example-etcd-cluster-5afd8f00ce   1/1       Running   0          21m
        example-etcd-cluster-a3f3b02a1b   1/1       Running   0          3m
-       example-etcd-cluster-e43636bc7c   1/1       Running   0          21m
-       ```
+       example-etcd-cluster-e43636bc7c   1/1       Running   0          21m   
+   ```
+       
+#### Delete a cluster
+1. Bring a cluster up.
+2. Delete the cluster by `kubectl delete etcdcluster example-etcd-cluster`. This should delete all the pods and services created because of this cluster
+
 
 #### TLS
 
