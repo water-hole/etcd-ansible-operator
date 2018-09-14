@@ -24,6 +24,6 @@ etcd_client_secret_name: "etcd-client-tls"
 etcd_peer_secret_name: "etcd-peer-tls"
 etcd_server_secret_name: "etcd-server-tls"
 
-l_secure_client: "absent"
-l_secure_peer: "absent"
+etcd_secure_client: "absent"
+etcd_secure_peer: "absent"
 

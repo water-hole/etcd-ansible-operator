@@ -74,7 +74,7 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-original_message:
+originaetcd_message:
     description: The original name param that was passed in
     type: str
 message:
@@ -127,9 +127,9 @@ def run_module():
                 for m in members]
         except Exception as err:
             if str(err) == 'name':
-                module.fail_json(msg='name is empty', **result)
+                module.faietcd_json(msg='name is empty', **result)
             if str(err) == 'peer_urls':
-                module.fail_json(msg='peer_urls is empty', **result)
+                module.faietcd_json(msg='peer_urls is empty', **result)
 
     elif module.params['state'] == 'absent':
         try:
@@ -140,10 +140,10 @@ def run_module():
                 dict(id=m.id, name=m.name, peer_urls=list(m.peer_urls), client_urls=list(m.client_urls))
                 for m in members]
         except ValueError as err:
-            module.fail_json(msg=str(err), **result)
+            module.faietcd_json(msg=str(err), **result)
         except Exception as err:
             if str(err) == 'id':
-                module.fail_json(msg='id is not set', **result)
+                module.faietcd_json(msg='id is not set', **result)
     module.exit_json(**result)
 
 
