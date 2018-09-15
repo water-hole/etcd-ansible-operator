@@ -9,8 +9,11 @@
 - name: set cluster member fact from lookup if single pod
   set_fact:
     etcd_members: "{{ [etcd_cluster_pods.metadata.name]}}"
-  when: etcd_cluster_pods.status is not undefined and etcd_cluster_pods.status == "Running"
+  when: etcd_cluster_pods.status is not undefined and etcd_cluster_pods.status.phase == "Running"
 
+- name: upgrade cluster pods if need be
+  include_tasks: upgrade_pod.yaml
+  loop: "{{ etcd_cluster_pods }}"
 
 - name: set cluster member fact from lookup if multiple pods
   set_fact:

@@ -1,4 +1,4 @@
-FROM quay.io/water-hole/ansible-operator:latest
+FROM docker.io/alaypatel07/ansible-operator
 USER root
 #RUN yes | pip uninstall ansible
 RUN pip install etcd3

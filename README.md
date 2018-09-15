@@ -2,7 +2,7 @@
 
 This operator implements the [etcd-operator](https://github.com/coreos/etcd-operator/) using ansible and is run using [ansible-operator](https://github.com/water-hole/ansible-operator)
 
-#### Steps to bring an etcd cluster up
+### Steps to bring an etcd cluster up
 
 1. Create rbac `kubectl create -f deploy/rbac.yaml`
 2. Create crds `kubectl create -f deploy/crd/yaml`
@@ -17,7 +17,7 @@ This operator implements the [etcd-operator](https://github.com/coreos/etcd-oper
     example-etcd-cluster-e43636bc7c   1/1       Running   0          14m
     ```
 
-#### Scale cluster up
+### Scale cluster up
 
 1. Bring a cluster up as discussed above
 2. Edit the `deploy/cr.yaml` file as follows:
@@ -54,7 +54,7 @@ This operator implements the [etcd-operator](https://github.com/coreos/etcd-oper
     example-etcd-cluster-a3f3b02a1b   1/1       Running   0          18s
     example-etcd-cluster-e43636bc7c   1/1       Running   0          18m
     ```
-#### Accessing the etcd cluster
+### Accessing the etcd cluster
 
 If you are using minikube:
 
@@ -67,7 +67,7 @@ If you are using minikube:
 If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-client.<namespace>.svc:2379` and it should work. If you are using secure client, use `https` protocol for the endpoint.
 
 
-#### Check failure recovery
+### Check failure recovery
 1. Bring a cluster up.
 2. Delete a pod to simulate a failure `kubectl delete pod example-etcd-cluster-1a7d2c2f8b`
 3. Within sometime, you should see the deleted pod going away and being replaced by a new pod, something like this:
@@ -81,12 +81,12 @@ If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-
        example-etcd-cluster-e43636bc7c   1/1       Running   0          21m   
    ```
        
-#### Delete a cluster
+### Delete a cluster
 1. Bring a cluster up.
 2. Delete the cluster by `kubectl delete etcdcluster example-etcd-cluster`. This should delete all the pods and services created because of this cluster
 
 
-#### TLS
+### TLS
 
 To create certificates, do the following:
 1. Bring [minikube](https://github.com/kubernetes/minikube/) up in your host.
@@ -115,6 +115,35 @@ To create certificates, do the following:
     ```
 
 
-#### Upgrades
+### Upgrades
 
-Work in progress
+The operator supports version upgrades for etcd. Steps to try it:
+
+1. Bring up an etcd cluster as discussed above.
+2. Check the version of the images
+    ```$ kubectl get pods -l app=etcd -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |sort
+       
+       example-etcd-cluster-1d139522e2:        quay.io/coreos/etcd:v3.2.13,
+       example-etcd-cluster-7e9909fce8:        quay.io/coreos/etcd:v3.2.13,
+       example-etcd-cluster-bb0a9b3ec8:        quay.io/coreos/etcd:v3.2.13,
+       ```
+3. Change the deploy/cr.yaml to the version you want the upgrade to 
+    ```
+    apiVersion: "etcd.database.coreos.com/v1beta2"
+    kind: "EtcdCluster"
+    metadata:
+      name: "example-etcd-cluster"
+    spec:
+      size: 3
+      version: "3.3"
+    ```
+4. Run the command: `kubectl apply -f deploy/cr.yaml`
+5. Verify with the following command 
+    ```
+    $ kubectl get pods -l app=etcd -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |sort
+    
+    example-etcd-cluster-1d139522e2:        quay.io/coreos/etcd:v3.3,
+    example-etcd-cluster-7e9909fce8:        quay.io/coreos/etcd:v3.3,
+    example-etcd-cluster-bb0a9b3ec8:        quay.io/coreos/etcd:v3.3,
+    
+    ```

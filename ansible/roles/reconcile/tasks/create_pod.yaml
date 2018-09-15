@@ -31,7 +31,7 @@
         containers:
         - name: "etcd"
 #        TODO: make it generic i.e. repository:vversion
-          image: "quay.io/coreos/etcd:v3.2.13"
+          image: "{{ image }}"
           command: "{{ etcd_command }}"
           ports:
           - containerPort: "{{etcd_client_port}}"

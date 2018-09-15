@@ -1,7 +1,7 @@
 ---
 # defaults file for etcd-ansible-operator
 
-
+image: "{{ 'quay.io/coreos/etcd:v' + version | string }}"
 etcd_namespace: "{{ meta.namespace }}"
 etcd_client_port: 2379
 etcd_peer_port: 2380
