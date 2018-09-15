@@ -37,7 +37,13 @@ class LookupModule(LookupBase):
     def run(self, terms, **kwargs):
         # lookups in general are expected to both take a list as input and output a list
         # this is done so they work with the looping construct 'with_'.
-        client = etcd3.client(host=kwargs['cluster_host'], port=kwargs['cluster_port'])
+        kwargs.setdefault('cert_cert', None)
+        kwargs.setdefault('ca_cert', None)
+        kwargs.setdefault('cert_key', None)
+        client = etcd3.client(host=kwargs['cluster_host'], port=kwargs['cluster_port'],
+                              cert_cert=kwargs['cert_cert'],
+                              cert_key=kwargs['cert_key'],
+                              ca_cert=kwargs['ca_cert'])
         ret = [dict(id=m.id, name=m.name, peer_urls=m.peer_urls, client_urls=m.client_urls)
                for m in client.members]
 

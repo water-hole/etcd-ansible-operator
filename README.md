@@ -88,7 +88,32 @@ If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-
 
 #### TLS
 
-Work in progress
+To create certificates, do the following:
+1. Bring [minikube](https://github.com/kubernetes/minikube/) up in your host.
+2. Install [ansible] (https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#running-from-source). Note the ansible version should be greater than 2.6
+3. Run `tls_playbook.yaml` as follows:
+
+    ```
+        ansible-playbook ansible/tls_playbook.yaml
+    ```
+   This should create certs in `/tmp/etcd/etcdtls/example-etcd-cluster/` directory. This should also create 3 kubernetes secrets
+4. Verify by running:
+    ```
+    $ kubectl get secrets
+    NAME                  TYPE                                  DATA      AGE
+    default-token-zhqgh   kubernetes.io/service-account-token   3         1d
+    etcd-client-tls       Opaque                                3         3h
+    etcd-peer-tls         Opaque                                3         3h
+    etcd-server-tls       Opaque                                3         3h
+    ```
+5. Create rbac if not already created `kubectl create -f deploy/rbac.yaml`
+6. Create crd if not already created `kubectl create -f deploy/crd.yaml`
+7. Deploy operator if nor already deployed `kubectl create -f deploy/operator.yaml`
+8. Create etcd cluster with tls using:
+    ```
+    kubectl create -f deploy/cr_tls.yaml
+    ```
+
 
 #### Upgrades
 

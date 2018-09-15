@@ -22,13 +22,24 @@
     etcd_failed_members: "{{ etcd_cluster_pods | map(attribute='metadata.name') | list | difference(etcd_members)}}"
 
 
-- name: set members of cluster
+- name: get members of cluster
   vars:
-    members: "{{ lookup('etcd_member', cluster_host= etcd_cluster_name + '.' + etcd_namespace + '.svc',
+    members: "{{ lookup('etcd_member', cluster_host= etcd_cluster_name + '-client.' + etcd_namespace + '.svc',
                   cluster_port= etcd_client_port) }}"
   set_fact:
     etcd_cluster_members: "{{ members }}"
-  when: (etcd_cluster_phase == "existing")
+  when: (etcd_cluster_phase == "existing" and etcd_secure_client == "absent")
+
+- name: get members of cluster when secure client
+  vars:
+    members: "{{ lookup('etcd_member', cluster_host= etcd_cluster_name + '-client.' + etcd_namespace + '.svc',
+                  cluster_port=etcd_client_port,
+                  ca_cert=tls_directory + '/etcd-ca.cert',
+                  cert_cert=tls_directory + '/etcd-client.crt',
+                  cert_key=tls_directory + '/etcd-client.key') }}"
+  set_fact:
+    etcd_cluster_members: "{{ members }}"
+  when: (etcd_cluster_phase == "existing" and etcd_secure_client == "present")
 
 
 - name: Get the members to be removed from the etcd cluster
@@ -47,11 +58,23 @@
 
 
 - name: remove members from etcd cluster that are not running
-  when: etcd_cluster_members is not undefined
+  when: etcd_cluster_members is not undefined and etcd_secure_client == "absent"
   etcd_member:
     state: "absent"
-    cluster_host: "{{ etcd_cluster_name + '.' + etcd_namespace + '.svc'}}"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
+    id: "{{ item }}"
+  loop: "{{ remove_members_ids }}"
+
+- name: remove members from etcd cluster that are not running for secure client
+  when: etcd_cluster_members is not undefined and etcd_secure_client == "present"
+  etcd_member:
+    state: "absent"
+    cluster_host: "{{ etcd_cluster_name + '.-client' + etcd_namespace + '.svc'}}"
+    cluster_port: "{{ etcd_client_port }}"
+    ca_cert: "{{tls_directory +  '/etcd-ca.cert'}}"
+    cert_cert: "{{tls_directory + '/etcd-client.crt'}}"
+    cert_key: "{{tls_directory + '/etcd-client.key'}}"
     id: "{{ item }}"
   loop: "{{ remove_members_ids }}"
 
@@ -102,7 +125,7 @@
                         'mountPath':'/etc/etcdtls/member/peer-tls'}]"
     etcd_volumes: "{{ etcd_volumes }} +
                 [{'name': 'member-peer-tls',
-                  'secret': {'secretName': '{{ TLS.static.member.peerSecret }}' }}]"
+                  'secret': {'secretName': '{{ _tls.static.member.peer_secret }}' }}]"
   when: etcd_secure_peer == "present"
 
 
@@ -115,19 +138,32 @@
                         'mountPath':'/etc/etcdtls/member/etcd-tls'}]"
     etcd_volumes: "{{ etcd_volumes }} +
                  [{'name': 'member-server-tls',
-                   'secret': {'secretName': '{{ TLS.static.member.serverSecret }}' }}] +
+                   'secret': {'secretName': '{{ _tls.static.member.server_secret }}' }}] +
                  [{'name': 'member-client-tls',
-                   'secret': {'secretName': '{{ TLS.static.operatorSecret }}' }}]"
+                   'secret': {'secretName': '{{ _tls.static.operator_secret }}' }}]"
   when: etcd_secure_client == "present"
 
 - name: add new members in cluster
-  when: etcd_cluster_phase == "existing"
+  when: etcd_cluster_phase == "existing" and etcd_secure_client == "absent"
   etcd_member:
     state: "present"
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     name: "{{ item }}"
     peer_urls: "{{ etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc:' + etcd_peer_port|string }}"
+  loop: "{{ etcd_new_members }}"
+
+- name: add new members in cluster when secure client
+  when: etcd_cluster_phase == "existing" and etcd_secure_client == "present"
+  etcd_member:
+    state: "present"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
+    cluster_port: "{{ etcd_client_port }}"
+    name: "{{ item }}"
+    peer_urls: "{{ etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc:' + etcd_peer_port|string }}"
+    ca_cert: "{{tls_directory + '/etcd-ca.cert'}}"
+    cert_cert: "{{tls_directory + '/etcd-client.crt'}}"
+    cert_key: "{{tls_directory + '/etcd-client.key'}}"
   loop: "{{ etcd_new_members }}"
 
 - name: create new pods
@@ -180,10 +216,21 @@
 - name: remove the member from etcd cluster
   etcd_member:
     state: "absent"
-    cluster_host: "{{ etcd_cluster_name + '.' + etcd_namespace + '.svc'}}"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     id: "{{ etcd_remove_member.id }}"
-  when: etcd_remove_member is not undefined
+  when: etcd_remove_member is not undefined and etcd_secure_client == "absent"
+
+- name: remove the member from etcd cluster
+  etcd_member:
+    state: "absent"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
+    cluster_port: "{{ etcd_client_port }}"
+    id: "{{ etcd_remove_member.id }}"
+    ca_cert: "{{tls_directory + '/etcd-ca.cert'}}"
+    cert_cert: "{{tls_directory + '/etcd-client.crt'}}"
+    cert_key: "{{tls_directory + '/etcd-client.key'}}"
+  when: etcd_remove_member is not undefined and etcd_secure_client == "present"
 
 - name: add the extra member to remove pods
   set_fact:
