@@ -2,12 +2,16 @@
 
 This operator implements the [etcd-operator](https://github.com/coreos/etcd-operator/) using ansible and is run using [ansible-operator](https://github.com/water-hole/ansible-operator)
 
+### Pre-requisites:
+
+Some sort of kubernetes cluster deployed with `kubectl` correctly configured. [Minikube](https://github.com/kubernetes/minikube/) is the easiest way to get started.
+
 ### Steps to bring an etcd cluster up
 
-1. Create rbac `kubectl create -f deploy/rbac.yaml`
-2. Create crds `kubectl create -f deploy/crd/yaml`
-3. Deploy the operator `kubectl create -f deploy/operator.yaml`
-4. Create a cluster `kubectl create -f deploy/cr.yaml`
+1. Create RBAC `kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/rbac.yaml`
+2. Create CRD `kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/crd.yaml`
+3. Deploy the operator `kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/operator.yaml`
+4. Create an etcd cluster `kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/cr.yaml`
 5. Verify that cluster is up by `kubectl get pods -l app=etcd`. You should see something like this
     ```
     $ kubectl get pods -l app=etcd
@@ -17,28 +21,35 @@ This operator implements the [etcd-operator](https://github.com/coreos/etcd-oper
     example-etcd-cluster-e43636bc7c   1/1       Running   0          14m
     ```
 
+### Accessing the etcd cluster
+
+If you are using minikube:
+
+1. Create a service to access etcd cluster from outside the cluster by `kubectl create -f https://raw.githubusercontent.com/coreos/etcd-operator/master/example/example-etcd-cluster-nodeport-service.json`
+2. Install [etcdctl](https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html)
+3. Set etcd version `export ETCDCTL_API=3`
+4. Set etcd endpoint `export ETCDCTL_ENDPOINTS=$(minikube service example-etcd-cluster-client-service --url)`
+5. Set a key in etcd `etcdctl put hello world`
+
+If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-client.<namespace>.svc:2379` and it should work. If you are using secure client, use `https` protocol for the endpoint.
+
+### Delete a cluster
+1. Bring a cluster up.
+2. Delete the cluster by `kubectl delete etcdcluster example-etcd-cluster`. This should delete all the pods and services created because of this cluster
+
 ### Scale cluster up
 
 1. Bring a cluster up as discussed above
-2. Edit the `deploy/cr.yaml` file as follows:
+2. Edit the example cr just created  with command 
+`kubectl edit etcdcluster example-etcd-cluster`. Change the size from `3` to `5`
 
     ```
     apiVersion: "etcd.database.coreos.com/v1beta2"
     kind: "EtcdCluster"
     metadata:
       name: "example-etcd-cluster"
-      ## Adding this annotation make this cluster managed by clusterwide operators
-      ## namespaced operators ignore it
-      # annotations:
-      #   etcd.database.coreos.com/scope: clusterwide
     spec:
       size: 5
-    #  TLS:
-    #    static:
-    #      member:
-    #        peerSecret: etcd-peer-tls
-    #        serverSecret: etcd-server-tls
-    #      operatorSecret: etcd-client-tls
       version: "3.2.13"
     ```
    This shoudl scale up the cluster by 2 pods.
@@ -54,18 +65,6 @@ This operator implements the [etcd-operator](https://github.com/coreos/etcd-oper
     example-etcd-cluster-a3f3b02a1b   1/1       Running   0          18s
     example-etcd-cluster-e43636bc7c   1/1       Running   0          18m
     ```
-### Accessing the etcd cluster
-
-If you are using minikube:
-
-1. Create a service to access etcd cluster from outside the cluster by `kubectl create -f https://raw.githubusercontent.com/coreos/etcd-operator/master/example/example-etcd-cluster-nodeport-service.json`
-2. Install [etcdctl](https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html)
-3. Set etcd version `export ETCDCTL_API=3`
-4. Set etcd endpoint `export ETCDCTL_ENDPOINTS=$(minikube service example-etcd-cluster-client-service --url)`
-5. Set a key in etcd `etcdctl put hello world`
-
-If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-client.<namespace>.svc:2379` and it should work. If you are using secure client, use `https` protocol for the endpoint.
-
 
 ### Check failure recovery
 1. Bring a cluster up.
@@ -81,11 +80,6 @@ If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-
        example-etcd-cluster-e43636bc7c   1/1       Running   0          21m   
    ```
        
-### Delete a cluster
-1. Bring a cluster up.
-2. Delete the cluster by `kubectl delete etcdcluster example-etcd-cluster`. This should delete all the pods and services created because of this cluster
-
-
 ### TLS
 
 To create certificates, do the following:
@@ -121,12 +115,13 @@ The operator supports version upgrades for etcd. Steps to try it:
 
 1. Bring up an etcd cluster as discussed above.
 2. Check the version of the images
-    ```$ kubectl get pods -l app=etcd -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |sort
+    ```
+    $ kubectl get pods -l app=etcd -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |sort
        
        example-etcd-cluster-1d139522e2:        quay.io/coreos/etcd:v3.2.13,
        example-etcd-cluster-7e9909fce8:        quay.io/coreos/etcd:v3.2.13,
        example-etcd-cluster-bb0a9b3ec8:        quay.io/coreos/etcd:v3.2.13,
-       ```
+   ```
 3. Change the deploy/cr.yaml to the version you want the upgrade to 
     ```
     apiVersion: "etcd.database.coreos.com/v1beta2"
