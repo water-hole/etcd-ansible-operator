@@ -52,10 +52,9 @@ If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-
       size: 5
       version: "3.2.13"
     ```
-   This shoudl scale up the cluster by 2 pods.
-
-3. Apply the changes `kubectl apply -f deploy/cr.yaml`
-4. Verify that the cluster has scaled up by `kubectl get pods -l app=etcd`. You should see something like this:
+   This should scale up the cluster by 2 pods.
+  
+3. Verify that the cluster has scaled up by `$kubectl get pods -l app=etcd`. You should see something like this:
     ```
     $ kubectl get pods -l app=etcd
     NAME                              READY     STATUS    RESTARTS   AGE
@@ -68,7 +67,7 @@ If you are inside the cluster, set the etcd endpoint to: `http://<cluster-name>-
 
 ### Check failure recovery
 1. Bring a cluster up.
-2. Delete a pod to simulate a failure `kubectl delete pod example-etcd-cluster-1a7d2c2f8b`
+2. Delete a pod to simulate a failure `$kubectl delete pod example-etcd-cluster-1a7d2c2f8b`
 3. Within sometime, you should see the deleted pod going away and being replaced by a new pod, something like this:
     
     ```$ kubectl get pods -l app=etcd
@@ -100,12 +99,12 @@ To create certificates, do the following:
     etcd-peer-tls         Opaque                                3         3h
     etcd-server-tls       Opaque                                3         3h
     ```
-5. Create rbac if not already created `kubectl create -f deploy/rbac.yaml`
-6. Create crd if not already created `kubectl create -f deploy/crd.yaml`
-7. Deploy operator if nor already deployed `kubectl create -f deploy/operator.yaml`
+5. Create rbac if not already created `$kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/rbac.yaml`
+6. Create crd if not already created `$kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/crd.yaml`
+7. Deploy operator if nor already deployed `$kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/operator.yaml`
 8. Create etcd cluster with tls using:
     ```
-    kubectl create -f deploy/cr_tls.yaml
+    kubectl create -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/cr_tls.yaml
     ```
 
 
@@ -122,18 +121,8 @@ The operator supports version upgrades for etcd. Steps to try it:
        example-etcd-cluster-7e9909fce8:        quay.io/coreos/etcd:v3.2.13,
        example-etcd-cluster-bb0a9b3ec8:        quay.io/coreos/etcd:v3.2.13,
    ```
-3. Change the deploy/cr.yaml to the version you want the upgrade to 
-    ```
-    apiVersion: "etcd.database.coreos.com/v1beta2"
-    kind: "EtcdCluster"
-    metadata:
-      name: "example-etcd-cluster"
-    spec:
-      size: 3
-      version: "3.3"
-    ```
-4. Run the command: `kubectl apply -f deploy/cr.yaml`
-5. Verify with the following command 
+3. Run the command: `$kubectl apply -f https://raw.githubusercontent.com/water-hole/etcd-ansible-operator/master/deploy/update_cr.yaml`
+4. Verify with the following command 
     ```
     $ kubectl get pods -l app=etcd -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |sort
     
