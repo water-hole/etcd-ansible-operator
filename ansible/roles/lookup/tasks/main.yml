@@ -10,12 +10,23 @@
     etcd_cluster_name: "{{ meta.name }}"
   when: meta.name is not undefined
 
-- name: lookup k8s cluster service
-  set_fact:
-    etcd_cluster_services: "{{ lookup('k8s', api_version='v1', kind='Service', namespace=etcd_namespace,
-                          label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
+- block:
+  - name: lookup k8s etcd cluster service
+    set_fact:
+      etcd_cluster_services: "{{ q('k8s', api_version='v1', kind='Service', namespace=etcd_namespace,
+                         label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
+  rescue:
+  - name: set etcd _cluster_services to default on failure to find GVK
+    set_fact:
+      etcd_cluster_services: []
 
-- name: lookup k8s etcd cluster pods
-  set_fact:
-    etcd_cluster_pods: "{{ lookup('k8s', api_version='v1', kind='Pod', namespace=etcd_namespace,
-                      label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
+
+- block:
+  - name: lookup k8s etcd cluster pods
+    set_fact:
+      etcd_cluster_pods: "{{ q('k8s', api_version='v1', kind='Pod', namespace=etcd_namespace,
+                                               label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
+  rescue:
+  - name: set etcd_cluster_pods to default on failure to find GVK
+    set_fact:
+      etcd_cluster_pods: []
