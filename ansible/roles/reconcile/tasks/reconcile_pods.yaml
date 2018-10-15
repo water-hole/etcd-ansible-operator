@@ -64,6 +64,7 @@
   when: etcd_cluster_members is not undefined and etcd_secure_client == "absent"
   etcd_member:
     state: "absent"
+    type: "member"
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     id: "{{ item }}"
@@ -73,6 +74,7 @@
   when: etcd_cluster_members is not undefined and etcd_secure_client == "present"
   etcd_member:
     state: "absent"
+    type: "member"
     cluster_host: "{{ etcd_cluster_name + '.-client' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     ca_cert: "{{tls_directory +  '/etcd-ca.cert'}}"
@@ -150,6 +152,7 @@
   when: etcd_cluster_phase == "existing" and etcd_secure_client == "absent"
   etcd_member:
     state: "present"
+    type: "member"
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     name: "{{ item }}"
@@ -160,10 +163,11 @@
   when: etcd_cluster_phase == "existing" and etcd_secure_client == "present"
   etcd_member:
     state: "present"
+    type: "member"
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     name: "{{ item }}"
-    peer_urls: "{{ etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc:' + etcd_peer_port|string }}"
+    peer_urls: "{{ etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc:' + etcd_peer_{{{|string }}"
     ca_cert: "{{tls_directory + '/etcd-ca.cert'}}"
     cert_cert: "{{tls_directory + '/etcd-client.crt'}}"
     cert_key: "{{tls_directory + '/etcd-client.key'}}"
@@ -219,6 +223,7 @@
 - name: remove the member from etcd cluster
   etcd_member:
     state: "absent"
+    type: "member"
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     id: "{{ etcd_remove_member.id }}"
@@ -227,6 +232,7 @@
 - name: remove the member from etcd cluster
   etcd_member:
     state: "absent"
+    type: "member"
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     id: "{{ etcd_remove_member.id }}"

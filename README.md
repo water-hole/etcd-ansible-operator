@@ -133,3 +133,6 @@ The operator supports version upgrades for etcd. Steps to try it:
     example-etcd-cluster-bb0a9b3ec8:        quay.io/coreos/etcd:v3.3,
     
     ```
+#### Backup
+
+WIP

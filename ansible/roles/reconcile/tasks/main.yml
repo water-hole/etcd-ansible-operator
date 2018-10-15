@@ -1,6 +1,10 @@
 ---
 # tasks file for etcd-ansible-operator
 
+- name: Call backup task if it is for backup
+  include_tasks: backup_s3.yaml
+  when: backup_s3 is not undefined
+
 - name: Determine if secure client
   set_fact:
     etcd_secure_client: "present"
