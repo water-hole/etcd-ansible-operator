@@ -1,13 +1,13 @@
 ---
 # defaults file for etcd-ansible-operator
 
+
 image: "{{ 'quay.io/coreos/etcd:v' + version | string }}"
 etcd_namespace: "{{ meta.namespace }}"
+etcd_cluster_name: "{{ meta.name }}"
 etcd_client_port: 2379
 etcd_peer_port: 2380
 etcd_app_label: "etcd"
-etcd_cluster_name: "example-etcd-cluster"
-etcd_cluster_pods: []
 etcd_volume_mounts:
 - name: "etcd-data"
   mountPath: "/var/etcd"
@@ -15,6 +15,12 @@ etcd_volumes:
 - name: "etcd-data"
   source:
     emptyDir: {}
+
+etcd_cluster_services: "{{ q('k8s', api_version='v1', kind='Service', namespace=etcd_namespace,
+                             label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
+
+etcd_cluster_pods: "{{ q('k8s', api_version='v1', kind='Pod', namespace=etcd_namespace,
+                                               label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
 
 
 etcd_new_members: []
@@ -26,16 +32,17 @@ etcd_peer_protocol: "http://"
 etcd_client_protocol: "http://"
 etcd_peer_tls_dir: "/etc/etcdtls/member/peer-tls"
 etcd_server_tls_dir: "/etc/etcdtls/member/server-tls"
-etcd_volume_mounts:
-- name: "etcd-data"
-  mountPath: "/var/etcd"
-etcd_volumes:
-- name: "etcd-data"
-  source:
-    emptyDir: {}
 etcd_peer_tls_commands: []
 etcd_client_tls_commands: []
 
 etcd_secure_client: "absent"
 etcd_secure_peer: "absent"
 etcd_remove_pods: []
+
+#etcd_endpoints: http://192.168.39.245:32379
+#storage_type: S3
+#s3:
+#  # The format of "path" must be: "<s3-bucket-name>/<path-to-backup-file>"
+#  # e.g: "mybucket/etcd.backup"
+#  path: alay-etcd-backup/trial1
+#  aws_secret: aws
