@@ -6,23 +6,18 @@
     etcd_cluster_phase: "new"
   when: (etcd_cluster_services|length == 0)
 
-- name: set cluster member fact from lookup if single pod
-  set_fact:
-    etcd_members: "{{ [etcd_cluster_pods.metadata.name]}}"
-  when: etcd_cluster_pods.status is not undefined and etcd_cluster_pods.status.phase == "Running"
-
 - name: upgrade cluster pods if need be
   include_tasks: upgrade_pod.yaml
   loop: "{{ etcd_cluster_pods }}"
 
-- name: set cluster member fact from lookup if multiple pods
+- name: set etcd_pod_names from fact from etcd_cluster_pods
   set_fact:
-    etcd_members: "{{ etcd_cluster_pods | selectattr('status.phase', 'match', 'Running') | map(attribute='metadata.name') | list }}"
+    etcd_pod_names: "{{ etcd_cluster_pods | selectattr('status.phase', 'match', 'Running') | map(attribute='metadata.name') | list }}"
   when: etcd_cluster_pods is defined and etcd_cluster_pods.status is undefined
 
 - name: set failed cluster member fact from lookup
   set_fact:
-    etcd_failed_members: "{{ etcd_cluster_pods | map(attribute='metadata.name') | list | difference(etcd_members)}}"
+    etcd_failed_pod_names: "{{ etcd_cluster_pods | map(attribute='metadata.name') | list | difference(etcd_pod_names)}}"
 
 
 - name: get members of cluster
@@ -47,7 +42,7 @@
 
 - name: Get the members to be removed from the etcd cluster
   set_fact:
-    remove_members_names: "{{ etcd_cluster_members | map(attribute='name') | list | difference(etcd_members)}}"
+    remove_members_names: "{{ etcd_cluster_members | map(attribute='name') | list | difference(etcd_pod_names)}}"
     remove_members_ids: []
   when: etcd_cluster_members is defined
 
@@ -55,8 +50,7 @@
 - name: set the ids of members to be removed from etcd cluster
   when: etcd_cluster_members is defined
   set_fact:
-    remove_members_ids: "{{ remove_members_ids + etcd_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list }}"
-    etcd_remove_pods: "{{ etcd_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list | difference(etcd_members+etcd_failed_members) }}"
+    remove_members_ids: "{{ remove_members_ids + (etcd_cluster_members | selectattr('name', 'match', item) | map(attribute='id') | list )}}"
   loop: "{{ remove_members_names }}"
 
 
@@ -83,9 +77,20 @@
     id: "{{ item }}"
   loop: "{{ remove_members_ids }}"
 
+
+- name: id_members fact
+  set_fact:
+    etcd_valid_member_ids: "{{ etcd_valid_member_ids + (etcd_cluster_members | map(attribute='id') | list | difference(remove_members_ids))}}"
+  when: etcd_cluster_members is defined
+
+- name: get the pods to delete
+  set_fact:
+    etcd_remove_pods: "{{ etcd_cluster_pods | map(attribute='metadata.name') | list | difference(etcd_cluster_members | map(attribute='name') | list) }}"
+  when: etcd_cluster_members is defined and etcd_cluster_pods is defined
+
 - name: generate names when cluster is expanding
   include_tasks: generate_names.yaml
-  when: (etcd_members|length < size)
+  when: (etcd_valid_member_ids|length < size)
 
 - name: set variables if peer is secure
   set_fact:
@@ -100,7 +105,7 @@
 - name: generate member peer urls
   set_fact:
     etcd_peer_urls: "{{ etcd_peer_urls + [ item + '=' + etcd_peer_protocol + '' + item + '.' + etcd_cluster_name + '.' + etcd_namespace + '.svc.cluster.local:' + etcd_peer_port|string ] }}"
-  loop: "{{ etcd_members + etcd_new_members}}"
+  loop: "{{ etcd_pod_names + etcd_new_members}}"
 
 - name: set cluster token
   set_fact:
@@ -199,22 +204,22 @@
     etcd_listen_client_url: "{{ etcd_client_protocol + '0.0.0.0:' +  etcd_client_port|string }}"
     etcd_data_dir: "/var/etcd/data"
     etcd_cmd:
-      - "/usr/local/bin/etcd"
-      - "{{ '--data-dir=' + etcd_data_dir }}"
-      - "{{ '--name=' + pod_name }}"
-      - "{{ '--initial-advertise-peer-urls=' + etcd_peer_url }}"
-      - "{{ '--listen-peer-urls=' + etcd_listen_peer_url }}"
-      - "{{ '--listen-client-urls=' + etcd_listen_client_url}}"
-      - "{{ '--advertise-client-urls=' + etcd_client_url}}"
-      - "{{ '--initial-cluster=' + etcd_peer_urls | join(',')}}"
-      - "{{ '--initial-cluster-state=' + etcd_cluster_phase }}"
-      - "{{ '--initial-cluster-token=' + etcd_token}}"
+    - "/usr/local/bin/etcd"
+    - "{{ '--data-dir=' + etcd_data_dir }}"
+    - "{{ '--name=' + pod_name }}"
+    - "{{ '--initial-advertise-peer-urls=' + etcd_peer_url }}"
+    - "{{ '--listen-peer-urls=' + etcd_listen_peer_url }}"
+    - "{{ '--listen-client-urls=' + etcd_listen_client_url}}"
+    - "{{ '--advertise-client-urls=' + etcd_client_url}}"
+    - "{{ '--initial-cluster=' + etcd_peer_urls | join(',')}}"
+    - "{{ '--initial-cluster-state=' + etcd_cluster_phase }}"
+    - "{{ '--initial-cluster-token=' + etcd_token}}"
     etcd_command: "{{ etcd_cmd }} + {{ etcd_peer_tls_commands }} + {{ etcd_client_tls_commands }}"
   include_tasks: create_pod.yaml
   loop: "{{ etcd_new_members }}"
 
 - name: pick a member to remove if cluster is contracting
-  when: (etcd_cluster_members is not undefined and size < etcd_cluster_members|length)
+  when: (etcd_cluster_members is not undefined and size < (etcd_valid_member_ids|length))
   set_fact:
     etcd_remove_member: "{{ item }}"
   with_random_choice: "{{ etcd_cluster_members }}"
@@ -228,7 +233,7 @@
     id: "{{ etcd_remove_member.id }}"
   when: etcd_remove_member is not undefined and etcd_secure_client == "absent"
 
-- name: remove the member from etcd cluster
+- name: remove the member from etcd cluster when secure client
   etcd_member:
     state: "absent"
     type: "member"

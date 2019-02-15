@@ -3,7 +3,7 @@
 
 - name: Call backup task if it is for backup
   include_tasks: backup_s3.yaml
-  when: backup_s3 is not undefined
+  when: backup_s3 is defined
 
 - name: Determine if secure client
   set_fact:

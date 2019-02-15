@@ -1,3 +1,9 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: etcd-ansible-operator
+
+---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -40,7 +46,7 @@ metadata:
   name: default-account-app-operator
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: etcd-ansible-operator
   namespace: default
 roleRef:
   kind: ClusterRole

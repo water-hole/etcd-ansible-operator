@@ -13,11 +13,5 @@ spec:
     singular: etcdcluster
   scope: Namespaced
   version: v1beta2
-status:
-  acceptedNames:
-    kind: EtcdCluster
-    listKind: EtcdClusterList
-    plural: etcdclusters
-    shortNames:
-    - etcd
-    singular: etcdcluster
+  subresources:
+    status: {}

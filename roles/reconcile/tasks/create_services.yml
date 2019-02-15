@@ -2,7 +2,7 @@
 
 - name: define variable for members.
   set_fact:
-    etcd_members: []
+    etcd_pod_names: []
     etcd_peer_urls: []
     etcd_cluster_phase: "new"
 

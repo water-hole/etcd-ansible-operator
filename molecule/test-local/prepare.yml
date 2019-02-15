@@ -1,0 +1,35 @@
+---
+- import_playbook: ../default/prepare.yml
+
+- name: Prepare operator resources
+  hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
+  tasks:
+  - name: Create EtcdCluster Custom Resource Definition
+    k8s:
+      definition: "{{ lookup('file', '/'.join([deploy_dir, 'crd.yaml'])) }}"
+
+  - name: Create EtcdBackup Custom Resource Definition
+    k8s:
+      definition: "{{ lookup('file', '/'.join([deploy_dir, 'backup_crd.yaml'])) }}"
+
+  - name: Create EtcdRestore Custom Resource Definition
+    k8s:
+      definition: "{{ lookup('file', '/'.join([deploy_dir, 'restore_crd.yaml'])) }}"
+
+
+  - name: Ensure specified namespace is present
+    k8s:
+      api_version: v1
+      kind: Namespace
+      name: '{{ namespace }}'
+
+  - name: Create RBAC resources
+    k8s:
+      definition: "{{ lookup('template', '/'.join([deploy_dir, item])) }}"
+      namespace: '{{ namespace }}'
+    with_items:
+      - test-rbac.yaml

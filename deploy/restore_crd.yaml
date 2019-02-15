@@ -12,3 +12,5 @@ spec:
     singular: etcdrestore
   scope: Namespaced
   version: v1beta2
+  subresources:
+    status: {}
