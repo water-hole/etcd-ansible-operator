@@ -1,0 +1,16 @@
+- name: get ids of members to be removed
+  vars:
+    etcd_cluster_member_names: "{{ etcd_cluster_members | sort(attribute='name') | list }}"
+  set_fact:
+    etcd_remove_member_ids: "{{ etcd_cluster_member_names[size:] | map(attribute='id') | list }}"
+
+- debug: "msg={{ etcd_remove_member_ids }}"
+
+- name: remove member
+  etcd_member:
+    state: "absent"
+    type: "member"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
+    cluster_port: "{{ etcd_client_port }}"
+    id: "{{ item }}"
+  loop: "{{ etcd_remove_member_ids }}"

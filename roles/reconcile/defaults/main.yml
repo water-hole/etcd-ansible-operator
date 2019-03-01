@@ -22,12 +22,13 @@ etcd_cluster_services: "{{ q('k8s', api_version='v1', kind='Service', namespace=
 etcd_cluster_pods: "{{ q('k8s', api_version='v1', kind='Pod', namespace=etcd_namespace,
                                                label_selector='etcd_cluster='+ etcd_cluster_name + ',app=' + etcd_app_label) }}"
 
+etcd_stateful_set: "{{ q('k8s', api_version='apps/v1', kind='StatefulSet', namespace=etcd_namespace, resource_name=etcd_cluster_name) }}"
 
 etcd_new_members: []
 etcd_remove_members: []
 etcd_peer_urls: []
 etcd_new_peer_urls: []
-etcd_cluster_phase: "existing"
+etcd_cluster_phase: "new"
 etcd_peer_protocol: "http://"
 etcd_client_protocol: "http://"
 etcd_peer_tls_dir: "/etc/etcdtls/member/peer-tls"
@@ -35,6 +36,8 @@ etcd_server_tls_dir: "/etc/etcdtls/member/server-tls"
 etcd_peer_tls_commands: []
 etcd_client_tls_commands: []
 
+etcd_member_size: 0
+etcd_cluster_members: []
 etcd_secure_client: "absent"
 etcd_secure_peer: "absent"
 etcd_remove_pods: []

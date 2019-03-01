@@ -41,6 +41,9 @@
         labels:
           app: "{{ etcd_app_label }}"
           etcd_cluster: "{{ etcd_cluster_name }}"
+        annotations:
+          # Create endpoints also if the related pod isn't ready
+          service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
       spec:
         selector:
           etcd_cluster: "{{ etcd_cluster_name }}"

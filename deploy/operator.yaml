@@ -15,7 +15,7 @@ spec:
       serviceAccountName: etcd-ansible-operator
       containers:
         - name: etcd-ansible-operator
-          image: docker.io/alaypatel07/etcd-ansible-operator:v0.5.0
+          image: docker.io/alaypatel07/etcd-ansible-operator:sts
           ports:
           - containerPort: 60000
             name: metrics
