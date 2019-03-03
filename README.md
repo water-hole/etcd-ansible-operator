@@ -1,6 +1,6 @@
 ## etcd-sts-operator
 
-This project stems from [etcd-ansible-operator](https://github.com/water-hole/etcd-ansible-operator). It is an effort to implement a POC operator for using `stateful sets` to deploy etcd, with a wider objective of using it in the original [etcd-operator](https://github.com/coreos/etcd-operator).
+This project stems from [etcd-ansible-operator](https://github.com/water-hole/etcd-ansible-operator). It is an effort to implement a POC operator for using `stateful sets` to deploy etcd, with a wider objective of using it in the original [etcd-operator](https://github.com/coreos/etcd-operator). Please check out a small [demo](https://www.youtube.com/watch?v=YcEu9wehb3M) showing that the [issue](https://github.com/coreos/etcd-operator/issues/1972) of loosing quorum in an etcd cluster is solved with this implementation.
 
 ### Pre-requisites for trying it out:
 
