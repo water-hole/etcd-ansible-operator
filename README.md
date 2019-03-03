@@ -14,7 +14,7 @@ To follow this guide, make sure you are in the `default` namespace.
 
 1. Create RBAC `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/rbac.yaml`
 2. Create CRD `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/crd.yaml`
-3. Deploy the operator `https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/cfa861a9c2e408ab90d578606e2b9a1e32e48b78/deploy/operator.yaml`
+3. Deploy the operator `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/operator.yaml`
 4. Create an etcd cluster `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/cr.yaml`
 5. Verify that cluster is up by `kubectl get pods -l app=etcd`. You should see something like this
     ```
