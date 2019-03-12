@@ -7,7 +7,7 @@ spec:
   serviceName: {{ etcd_cluster_name }}
   # changing replicas value will require a manual etcdctl member remove/add
   # command (remove before decreasing and add after increasing)
-  replicas: {{ size }}
+  replicas: 1
   #  updateStrategy:
   #    type: "RollingUpdate"
   #    rollingUpdate:
@@ -26,6 +26,28 @@ spec:
       containers:
       - name: "etcd"
         image: "quay.io/coreos/etcd:v3.3"
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -ec
+              - ETCDCTL_API=3 etcdctl endpoint status
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -ec
+              - ETCDCTL_API=3 etcdctl endpoint status
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 10
         ports:
         - containerPort: 2379
           name: client
@@ -37,7 +59,7 @@ spec:
         # be the intended size of the cluster after scaling.
         - name: INITIAL_CLUSTER_SIZE
 #          This is a hack, needs to be removed in the future with a version that does not update the value.
-          value: "{{ size }}"
+          value: "1"
         - name: SET_NAME
           value: "{{ etcd_cluster_name }}"
         volumeMounts:

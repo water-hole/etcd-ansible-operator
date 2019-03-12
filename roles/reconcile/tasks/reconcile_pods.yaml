@@ -33,6 +33,7 @@
 - name: set new size
   set_fact:
     etcd_stateful_set: "{{ etcd_stateful_set[0]|combine({'spec': {'replicas': size}}, recursive=True)}}"
+  when: etcd_cluster_phase == "existing"
 
 - name: patch the "{{ etcd_cluster_name }}" resources
   k8s:
