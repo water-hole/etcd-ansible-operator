@@ -57,6 +57,7 @@ spec:
         # When scaling the etcd cluster up or down, the INITIAL_CLUSTER_SIZE
         # would be the current size of the cluster and the CLUSTER_SIZE would
         # be the intended size of the cluster after scaling.
+        # TODO: set INITIAL_CLUSTER_SIZE my mounting configmap.
         - name: INITIAL_CLUSTER_SIZE
 #          This is a hack, needs to be removed in the future with a version that does not update the value.
           value: "1"
@@ -97,16 +98,16 @@ spec:
               done
           done
           # re-joining after failure?
-          if [[ -e /var/run/etcd/default.etcd ]]; then
-            echo "Re-joining etcd member"
-            member_id=$(cat /var/run/etcd/member_id)
-            # re-join member
-            ETCDCTL_ENDPOINT=$(eps) etcdctl member update ${member_id} http://${HOSTNAME}.${SET_NAME}:2380 | true
-            exec etcd --name ${HOSTNAME} \
-                --listen-peer-urls http://0.0.0.0:2380 \
-                --listen-client-urls http://0.0.0.0:2379\
-                --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
-                --data-dir /var/run/etcd/default.etcd
+          if [[ -e /var/run/etcd/member_id ]]; then
+              echo "Re-joining etcd member"
+              member_id=$(cat /var/run/etcd/member_id)
+              # re-join member
+              ETCDCTL_ENDPOINT=$(eps) etcdctl member update ${member_id} http://${HOSTNAME}.${SET_NAME}:2380 | true
+              exec etcd --name ${HOSTNAME} \
+                  --listen-peer-urls http://0.0.0.0:2380 \
+                  --listen-client-urls http://0.0.0.0:2379\
+                  --advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
+                  --data-dir /var/run/etcd/default.etcd
           fi
           # etcd-SET_ID
           SET_ID=${HOSTNAME##*[^0-9]}
