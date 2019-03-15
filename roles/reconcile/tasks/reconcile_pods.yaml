@@ -30,9 +30,20 @@
     definition: "{{ lookup('template', 'ss.yaml' | from_yaml ) }}"
   when: etcd_cluster_phase == "new"
 
+- name: make sure all the pods are running
+  k8s_facts:
+    kind: StatefulSet
+    api_version: apps/v1
+    namespace: "{{ etcd_namespace }}"
+    name: "{{ etcd_cluster_name }}"
+  register: sts
+  until: sts.get("resources", []) and sts.resources[0].get("status", {}).get("readyReplicas", 0) == {{ size }}
+  retries: 30
+  delay: 10
+
 - name: set new size
   set_fact:
-    etcd_stateful_set: "{{ etcd_stateful_set[0]|combine({'spec': {'replicas': size}}, recursive=True)}}"
+    etcd_stateful_set: "{{ lookup('template', 'ss.yaml' | from_yaml) }}"
   when: etcd_cluster_phase == "existing"
 
 - name: patch the "{{ etcd_cluster_name }}" resources
