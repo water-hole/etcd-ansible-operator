@@ -40,11 +40,21 @@ class LookupModule(LookupBase):
         kwargs.setdefault('cert_cert', None)
         kwargs.setdefault('ca_cert', None)
         kwargs.setdefault('cert_key', None)
-        client = etcd3.client(host=kwargs['cluster_host'], port=kwargs['cluster_port'],
-                              cert_cert=kwargs['cert_cert'],
-                              cert_key=kwargs['cert_key'],
-                              ca_cert=kwargs['ca_cert'])
-        ret = [dict(id=m.id, name=m.name, peer_urls=m.peer_urls, client_urls=m.client_urls)
-               for m in client.members]
+        kwargs.setdefault('cluster_host', '')
+        kwargs.setdefault('cluster_port', 0)
 
-        return ret
+        if kwargs['cluster_host'] == '':
+            raise AnsibleError('Cluster host undefined')
+        elif kwargs['cluster_port'] == 0:
+            raise AnsibleError('Cluster port undefined')
+
+        try:
+            client = etcd3.client(host=kwargs['cluster_host'], port=kwargs['cluster_port'],
+                                  cert_cert=kwargs['cert_cert'],
+                                  cert_key=kwargs['cert_key'],
+                                  ca_cert=kwargs['ca_cert'])
+            ret = [dict(id=m.id, name=m.name, peer_urls=m.peer_urls, client_urls=m.client_urls)
+                   for m in client.members]
+            return ret
+        except Exception as e:
+            raise AnsibleError('Unable to fetch members. Error: {0}'.format(str(e)))

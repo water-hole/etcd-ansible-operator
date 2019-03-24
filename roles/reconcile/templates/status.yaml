@@ -1,0 +1,11 @@
+phase: {{ etcd_status | default('Unknown') }}
+reason: {{ etcd_status_reason | default('') }}
+controlPaused: {{ control_paused | default(false) }}
+size: {{ size }}
+serviceName: {{ etcd_cluster_name }}-client
+clientPort: {{ etcd_client_port }}
+currentVersion: {{ version }}
+targetVersion: {{ version }}
+members:
+  ready: {{ (etcd_cluster_members | map(attribute='name') | list) | join(',') }}
+  unready: {{ (etcd_cluster_member_names | difference(etcd_cluster_members | map(attribute='name') | list)) | join(',') }}

@@ -1,9 +1,33 @@
 ---
-#this task maintains members for a cluster and other commands.
 - name: set etcd_cluster_phase
   set_fact:
     etcd_cluster_phase: "existing"
   when: etcd_stateful_set|length > 0
+
+- block:
+
+  - name: set the "{{ etcd_cluster_name }}" resources state=present
+    k8s:
+      state: "present"
+      definition: "{{ lookup('template', 'ss.yaml') | from_yaml }}"
+
+  - name: set cluster status when new
+    vars:
+      etcd_status: "Creating"
+    k8s_status:
+      api_version: etcd.database.coreos.com/v1beta2
+      kind: EtcdCluster
+      name: "{{ etcd_cluster_name }}"
+      namespace: "{{ etcd_namespace }}"
+      status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
+
+  when: etcd_cluster_phase == "new"
+
+- name: set cluster member names
+  set_fact:
+    etcd_cluster_member_names: "{{ etcd_cluster_member_names + [etcd_cluster_name + '-' + item|string] }}"
+  with_sequence: start={{0}} end={{size - 1}}
+  when: etcd_cluster_phase == "existing"
 
 - name: get members of cluster
   vars:
@@ -12,6 +36,7 @@
   set_fact:
     etcd_cluster_members: "{{ members }}"
   when: (etcd_cluster_phase == "existing" and etcd_secure_client == "absent")
+  ignore_errors: yes
 
 - name: get members of cluster when secure client
   vars:
@@ -23,12 +48,101 @@
   set_fact:
     etcd_cluster_members: "{{ members }}"
   when: (etcd_cluster_phase == "existing" and etcd_secure_client == "present")
+  ignore_errors: yes
 
-- name: set the "{{ etcd_cluster_name }}" resources state=present
-  k8s:
-    state: "present"
-    definition: "{{ lookup('template', 'ss.yaml' | from_yaml ) }}"
-  when: etcd_cluster_phase == "new"
+- block:
+
+  - name: Set status and exit when cluster is unavailable
+    vars:
+      etcd_status: "Unavailable"
+      etcd_status_reason: "Etcd is trying to establish quorum"
+    k8s_status:
+      api_version: etcd.database.coreos.com/v1beta2
+      kind: EtcdCluster
+      name: "{{ etcd_cluster_name }}"
+      namespace: "{{ etcd_namespace }}"
+      status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
+
+  - fail:
+      msg: cluster is unavailable
+
+  when: etcd_cluster_phase == "existing" and etcd_cluster_members|length <= (etcd_stateful_set[0].spec.replicas/2)
+
+- name: Set status when cluster is available
+  vars:
+    etcd_status: Available
+  k8s_status:
+    api_version: etcd.database.coreos.com/v1beta2
+    kind: EtcdCluster
+    name: "{{ etcd_cluster_name }}"
+    namespace: "{{ etcd_namespace }}"
+    status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
+  when: etcd_cluster_phase == "existing" and etcd_cluster_members|length > (size/2 + 1)
+
+- block:
+
+  - name: Change initial_size if Scaling
+    set_fact:
+      initial_size: "{{ etcd_stateful_set[0].spec.replicas }}"
+
+  - name: Set status when Scaling
+    vars:
+      etcd_status: Scaling
+    k8s_status:
+      api_version: etcd.database.coreos.com/v1beta2
+      kind: EtcdCluster
+      name: "{{ etcd_cluster_name }}"
+      namespace: "{{ etcd_namespace }}"
+      status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
+
+  - name: set new size
+    set_fact:
+      new_etcd_stateful_set: "{{ lookup('template', 'ss.yaml') | from_yaml }}"
+    when: etcd_cluster_phase == "existing"
+
+  - name: patch the "{{ etcd_cluster_name }}" resources
+    k8s:
+      state: "present"
+      definition: "{{ new_etcd_stateful_set }}"
+    when: etcd_cluster_phase == "existing"
+
+  when: size != etcd_stateful_set[0].spec.replicas
+
+- block:
+
+  - name: get ids of members to be removed
+    vars:
+      _ids: "{{ etcd_cluster_members | sort(attribute='name') | map(attribute='id') | list }}"
+    set_fact:
+      etcd_remove_member_ids: "{{ _ids[size:] | list }}"
+
+  - debug: "msg={{ etcd_remove_member_ids }}"
+
+  - name: remove members
+    etcd_member:
+      state: "absent"
+      type: "member"
+      cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
+      cluster_port: "{{ etcd_client_port }}"
+      id: "{{ item }}"
+    loop: "{{ etcd_remove_member_ids }}"
+
+  - name: get the names of deleted members
+    set_fact:
+      _pod_names: "{{ (etcd_cluster_members | sort(attribute='name') | map(attribute='name') | list)[size:] }}"
+
+  - debug: "msg={{ _pod_names }}"
+
+  - name: delete the pvcs
+    k8s:
+      state: absent
+      api_version: v1
+      kind: PersistentVolumeClaim
+      name: "data-{{ item }}"
+      namespace: "{{ meta.namespace }}"
+    loop: "{{ _pod_names }}"
+
+  when: etcd_cluster_phase == "existing" and (etcd_cluster_members|length|int) > size
 
 - name: make sure all the pods are running
   k8s_facts:
@@ -37,23 +151,6 @@
     namespace: "{{ etcd_namespace }}"
     name: "{{ etcd_cluster_name }}"
   register: sts
-  until: sts.get("resources", []) and sts.resources[0].get("status", {}).get("readyReplicas", 0) == {{ size }}
+  until: sts.get("resources", []) and sts.resources[0].get("status", {}).get("readyReplicas", 0) == size
   retries: 30
   delay: 10
-
-- name: set new size
-  set_fact:
-    etcd_stateful_set: "{{ lookup('template', 'ss.yaml' | from_yaml) }}"
-  when: etcd_cluster_phase == "existing"
-
-- name: patch the "{{ etcd_cluster_name }}" resources
-  k8s:
-    state: "present"
-    definition: "{{ etcd_stateful_set }}"
-  when: etcd_cluster_phase == "existing"
-
-- name: remove members from cluster when scaling down
-  vars:
-    etcd_member_size: "{{ etcd_cluster_members|length|int }}"
-  when: etcd_cluster_phase == "existing" and etcd_member_size|int > size
-  include_tasks: remove_member.yaml

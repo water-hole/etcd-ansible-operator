@@ -42,6 +42,7 @@ etcd_secure_client: "absent"
 etcd_secure_peer: "absent"
 etcd_remove_pods: []
 etcd_valid_member_ids: []
+etcd_cluster_member_names: []
 
 #etcd_endpoints: http://192.168.39.245:32379
 #storage_type: S3
