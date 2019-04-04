@@ -1,0 +1,27 @@
+
+- name: remove member
+  etcd_member:
+    state: "absent"
+    type: "member"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
+    cluster_port: "{{ etcd_client_port }}"
+    id: "{{ item.id }}"
+
+- name: delete the pvc
+  k8s:
+    state: absent
+    api_version: v1
+    kind: PersistentVolumeClaim
+    name: "data-{{ item.name }}"
+    namespace: "{{ meta.namespace }}"
+
+- name: delete the pod if present
+  k8s:
+    state: absent
+    api_version: v1
+    kind: Pod
+    name: "{{ item.name }}"
+    namespace: "{{ meta.namespace }}"
+
+- pause:
+    seconds: 1

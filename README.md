@@ -14,10 +14,13 @@ To follow this guide, make sure you are in the `default` namespace.
 
 1. Create RBAC `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/rbac.yaml`
 2. Create CRD `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/crd.yaml`
-3. Deploy the operator `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/operator.yaml`
-4. Create an etcd cluster `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/cr.yaml`
-5. Verify that cluster is up by `kubectl get pods -l app=etcd`. You should see something like this
-    ```
+3. Create EtcdRestore CRD `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/restore_crd.yaml`
+4. Create EtcdBackup CRD `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/backup_crd.yaml`
+5. Deploy the operator `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/operator.yaml`
+6. Create an etcd cluster `kubectl create -f https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/cr.yaml`
+7. Verify that cluster is up by `kubectl get pods -l app=etcd`. You should see something like this
+
+    ```bash
     $ kubectl get pods -l app=etcd
     NAME                     READY   STATUS    RESTARTS   AGE
     example-etcd-cluster-0   1/1     Running   0          27s
@@ -49,7 +52,8 @@ Recovering from loss of all the pods is the key purpose behind the idea of using
 5. Within sometime, you should see all the pods going away and being replaced by a new pods, something like this.
 6. After sometime, the cluster will be available again. 
 7. Check if the data exists:
-```
+
+```bash
 $ etcdctl get hello
 hello
 world
@@ -57,4 +61,44 @@ world
 
 ### Delete a cluster
 1. Bring a cluster up.
-2. Delete the cluster by `kubectl delete etcdcluster example-etcd-cluster`. This should delete all the pods and services created because of this cluster       
+2. Delete the cluster by `kubectl delete etcdcluster example-etcd-cluster`. This should delete all the pods and services created because of this cluster 
+
+### Restore a cluster
+
+This project only supports restoring a cluster from S3 bucket right now. To restore you will need the AWS `config` and `credentials` [file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). Place the config and credentials file in a directory and run following commands to create a secret:
+
+```bash
+$ export AWS_DIR="/path/to/aws/credentials"
+$ cat $AWS_DIR/credentials
+[default]
+aws_access_key_id = XXX
+aws_secret_access_key = XXX
+
+$ cat $AWS_DIR/config
+[default]
+region = <region>
+
+$ kubectl create secret generic aws --from-file=$AWS_DIR/credentials --from-file=$AWS_DIR/config
+```
+
+Run the following commands to create the EtcdCluster CR, replacing `mybucket/etcd.backup` with the full path of the backup file:
+
+```bash
+$ wget https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/restor_cr.yaml
+$ sed -e 's|<full-s3-path>|mybucket/etcd.backup|g' \
+    -e 's|<aws-secret>|aws|g' \
+    restore_cr.yaml \
+    | kubectl create -f -
+```
+
+This will start the restore process, wait till the `status.phase` of EtcdRestore cr is `Complete` with the following command:
+
+```bash
+$ kubectl get -w etcdrestore example-etcd-cluster -o jsonpath='{.status.phase}'
+```
+
+### Backup a cluster
+W.I.P
+
+### TLS certs for the cluster
+W.I.P

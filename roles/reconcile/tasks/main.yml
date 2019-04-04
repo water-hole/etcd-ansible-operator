@@ -1,5 +1,29 @@
 ---
 # tasks file for etcd-ansible-operator
+- block:
+    - name: Set status when cluster is available
+      vars:
+        etcd_status: Unknown
+        control_paused: true
+        version: ""
+        etcd_cluster_members: []
+        etcd_cluster_member_names: []
+        size: ""
+      k8s_status:
+        api_version: etcd.database.coreos.com/v1beta2
+        kind: EtcdCluster
+        name: "{{ etcd_cluster_name }}"
+        namespace: "{{ etcd_namespace }}"
+        status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
+
+
+    - name: "end play if nothing spec.pause is true"
+      debug:
+        msg: "skipping reconciliation"
+
+    - meta: end_play
+
+  when: pause is defined and pause == true
 
 - name: Call backup task if it is for backup
   include_tasks: backup_s3.yaml

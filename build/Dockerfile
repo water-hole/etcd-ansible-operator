@@ -1,11 +1,10 @@
-FROM quay.io/operator-framework/ansible-operator:v0.5.0
+FROM quay.io/operator-framework/ansible-operator:v0.6.0
 USER root
 RUN pip install etcd3
 RUN pip install boto3
 RUN pip install botocore
 
-RUN useradd -u ${USER_UID} ${USER_NAME}
-USER ${USER_NAME}
+USER ${USER_UID}
 
 COPY roles/ ${HOME}/roles/
 COPY playbook.yaml ${HOME}/playbook.yaml

@@ -77,7 +77,9 @@
     name: "{{ etcd_cluster_name }}"
     namespace: "{{ etcd_namespace }}"
     status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
-  when: etcd_cluster_phase == "existing" and etcd_cluster_members|length > (size/2 + 1)
+  when: etcd_cluster_phase == "existing" and
+        ((etcd_cluster_members|length > (size/2 + 1)) or
+        (etcd_cluster_members|length <= 2 and etcd_cluster_members|length == size))
 
 - block:
 
@@ -98,6 +100,7 @@
   - name: set new size
     set_fact:
       new_etcd_stateful_set: "{{ lookup('template', 'ss.yaml') | from_yaml }}"
+      scaling: true
     when: etcd_cluster_phase == "existing"
 
   - name: patch the "{{ etcd_cluster_name }}" resources
@@ -112,35 +115,9 @@
 
   - name: get ids of members to be removed
     vars:
-      _ids: "{{ etcd_cluster_members | sort(attribute='name') | map(attribute='id') | list }}"
-    set_fact:
-      etcd_remove_member_ids: "{{ _ids[size:] | list }}"
-
-  - debug: "msg={{ etcd_remove_member_ids }}"
-
-  - name: remove members
-    etcd_member:
-      state: "absent"
-      type: "member"
-      cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
-      cluster_port: "{{ etcd_client_port }}"
-      id: "{{ item }}"
-    loop: "{{ etcd_remove_member_ids }}"
-
-  - name: get the names of deleted members
-    set_fact:
-      _pod_names: "{{ (etcd_cluster_members | sort(attribute='name') | map(attribute='name') | list)[size:] }}"
-
-  - debug: "msg={{ _pod_names }}"
-
-  - name: delete the pvcs
-    k8s:
-      state: absent
-      api_version: v1
-      kind: PersistentVolumeClaim
-      name: "data-{{ item }}"
-      namespace: "{{ meta.namespace }}"
-    loop: "{{ _pod_names }}"
+      etcd_remove_members: "{{ (etcd_cluster_members | sort(attribute='name'))[size:] }}"
+    include_tasks: remove_members.yaml
+    loop: "{{ etcd_remove_members | reverse | list}} "
 
   when: etcd_cluster_phase == "existing" and (etcd_cluster_members|length|int) > size
 
@@ -154,3 +131,13 @@
   until: sts.get("resources", []) and sts.resources[0].get("status", {}).get("readyReplicas", 0) == size
   retries: 30
   delay: 10
+
+- name: set fact for initial cluster size
+  set_fact:
+    initial_size: "{{ size }}"
+
+- name: make new size the initial size
+  k8s:
+    state: "present"
+    definition: "{{ lookup('template', 'ss.yaml') | from_yaml }}"
+  when: scaling is defined
