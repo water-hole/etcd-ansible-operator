@@ -40,9 +40,9 @@
 
 - name: get members of cluster when secure client
   vars:
-    members: "{{ lookup('etcd_member', cluster_host= etcd_cluster_name + '-client.' + etcd_namespace + '.svc',
+    members: "{{ q('etcd_member', cluster_host= etcd_cluster_name + '-client.' + etcd_namespace + '.svc',
                   cluster_port=etcd_client_port,
-                  ca_cert=tls_directory + '/etcd-ca.cert',
+                  ca_cert=tls_directory + '/etcd-ca.crt',
                   cert_cert=tls_directory + '/etcd-client.crt',
                   cert_key=tls_directory + '/etcd-client.key') }}"
   set_fact:

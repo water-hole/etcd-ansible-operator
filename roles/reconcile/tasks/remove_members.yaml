@@ -6,6 +6,19 @@
     cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
     cluster_port: "{{ etcd_client_port }}"
     id: "{{ item.id }}"
+  when: etcd_secure_client == "absent"
+
+- name: remove member when secure client
+  etcd_member:
+    state: "absent"
+    type: "member"
+    cluster_host: "{{ etcd_cluster_name + '-client.' + etcd_namespace + '.svc'}}"
+    cluster_port: "{{ etcd_client_port }}"
+    id: "{{ item.id }}"
+    ca_cert: "{{ tls_directory }}/etcd-ca.crt"
+    cert_cert: "{{ tls_directory }}/etcd-client.crt"
+    cert_key: "{{ tls_directory }}/etcd-client.key"
+  when: etcd_secure_client == "present"
 
 - name: delete the pvc
   k8s:

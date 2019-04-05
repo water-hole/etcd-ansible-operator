@@ -43,6 +43,8 @@
 
 
 - name: call create certs on secure client
+  vars:
+    tls_secret_name: "{{ _tls.static.operator_secret }}"
   include_tasks: create_certs.yaml
   when: etcd_secure_client == "present"
 

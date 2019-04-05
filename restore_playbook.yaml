@@ -6,6 +6,8 @@
   - name: set fact restore_s3
     set_fact:
       restore_s3: true
+      etcd_secure_client: "absent"
+      etcd_secure_peer: "absent"
 
   - name: lookup for status
     set_fact:
@@ -21,7 +23,7 @@
 
   - debug: msg="phase is Complete hence first run"
 
-  - name: Update etcdrestore cr status to Complete
+  - name: Update etcdrestore cr status to Restoring
     k8s_status:
       api_version: "etcd.database.coreos.com/v1beta2"
       kind: "EtcdRestore"
@@ -56,6 +58,22 @@
       fail_reconciliation: true
       fail_reason: "EtcdCluster CR {{ meta.namespace }}/{{ meta.name }} not Found"
     when: cluster_spec|length == 0
+
+  - name: Determine if secure client
+    set_fact:
+      etcd_secure_client: "present"
+    when: (cluster_spec[0].spec.TLS is not undefined and cluster_spec[0].spec.TLS.static is not undefined and cluster_spec[0].spec.TLS.static.operatorSecret is not undefined and cluster_spec[0].spec.TLS.static.operatorSecret|length > 0 )
+
+  - name: Determine if secure peer
+    set_fact:
+      etcd_secure_peer: "present"
+    when: ( cluster_spec[0].spec.TLS is not undefined and cluster_spec[0].spec.TLS.static is not undefined and cluster_spec[0].spec.TLS.static.member is not undefined and cluster_spec[0].spec.TLS.static.member.peerSecret|length > 0)
+
+#  - name: call create certs on secure client
+#    vars:
+#      tls_secret_name: "{{ _tls.static.operator_secret }}"
+#    include_tasks: create_certs.yaml
+#    when: etcd_secure_client == "present"
 
   - block:
     - name: Set status when EtcdCluster cr not found
@@ -152,67 +170,146 @@
         - "-e"
         - "file_path=/var/run/etcd"
       initial_cluster: []
-#      etcd_peer_url: "http://{{ pod_name }}.{{meta.name}}.{{meta.namespace}}.svc.cluster.local:2380"
       etcd_token: "{{ meta.name }}"
       image: "{{ 'quay.io/coreos/etcd:v' + cluster_spec[0].spec.version | string }}"
       etcd_volume_mounts:
         - mountPath: "/var/run/etcd"
           name: "data"
 
-  - name: generate initial cluster variable
-    set_fact:
-      initial_cluster: "{{ initial_cluster + [meta.name + '-' + (item|string) + '=http://' + meta.name + '-' + (item|string) + '.' + meta.name + '.' + meta.namespace + '.svc.cluster.local:2380'] }}"
-#      initial_cluster: "{{ initial_cluster + [meta.name + '-' + (item|string) + '=http://' + meta.name + '-' + (item|string) + '.' + meta.name + '.' + meta.namespace + '.svc.cluster.local:2380'] }}"
-    with_sequence: start=0 end={{cluster_spec[0].spec.size|int - 1}}
+  - block:
 
+    - name: generate initial cluster variable
+      set_fact:
+        initial_cluster: "{{ initial_cluster + [meta.name + '-' + (item|string) + '=http://' + meta.name + '-' + (item|string) + '.' + meta.name + '.' + meta.namespace + '.svc.cluster.local:2380'] }}"
+  #      initial_cluster: "{{ initial_cluster + [meta.name + '-' + (item|string) + '=http://' + meta.name + '-' + (item|string) + '.' + meta.name + '.' + meta.namespace + '.svc.cluster.local:2380'] }}"
+      with_sequence: start=0 end={{cluster_spec[0].spec.size|int - 1}}
 
-  - name: Create Restore Pods
-    vars:
-      etcd_volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: "data-{{ meta.name }}-{{ item|string }}"
-      pod_name: "{{ meta.name }}-{{ item|string }}"
-      etcd_peer_url: "http://{{ meta.name }}-{{ item|string }}.{{meta.name}}.{{meta.namespace}}.svc.cluster.local:2380"
-      init_containers:
-        - name: "fetch-backup"
-          image: "docker.io/alaypatel07/etcd-ansible-restore"
-          command: ["ansible-playbook"]
-          args: "{{ fetch_args }}"
-          imagePullPolicy: Always
-          volumeMounts: "{{ etcd_volume_mounts }}"
-        - name: "delete-datadir"
-          image: "{{ image }}"
-          command:
-            - "/bin/sh"
-          args:
-            - "-ec"
-            - "if [ -d '/var/run/etcd/default.etcd' ]; then rm -rf /var/run/etcd/default.etcd;  fi && if [ -f '/var/run/etcd/member_id' ]; then rm -f /var/run/etcd/member_id;  fi"
-          volumeMounts: "{{ etcd_volume_mounts }}"
-    k8s:
-      state: present
-      definition:
-        apiVersion: "v1"
-        kind: Pod
-        metadata:
-          name: "{{ pod_name }}"
-          namespace: "{{ meta.namespace }}"
-          labels:
-            etcd_cluster: "{{ meta.name }}"
-            app: "etcd"
-        spec:
-          serviceAccountName: "etcd-ansible-operator"
-          initContainers: "{{ init_containers }}"
-          hostname: "{{ pod_name }}"
-          subdomain: "{{ meta.name }}"
-          containers:
-            - name: "restore-datadir"
-              image: "{{ image }}"
-              command:
-                - "/bin/sh"
-              args:
-                - "-ec"
-                - "while true; do
+    - name: Create Restore Pods
+      vars:
+        etcd_volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: "data-{{ meta.name }}-{{ item|string }}"
+        pod_name: "{{ meta.name }}-{{ item|string }}"
+        etcd_peer_url: "http://{{ meta.name }}-{{ item|string }}.{{meta.name}}.{{meta.namespace}}.svc.cluster.local:2380"
+        init_containers:
+          - name: "fetch-backup"
+            image: "docker.io/alaypatel07/etcd-ansible-restore"
+            command: ["ansible-playbook"]
+            args: "{{ fetch_args }}"
+            imagePullPolicy: Always
+            volumeMounts: "{{ etcd_volume_mounts }}"
+          - name: "delete-datadir"
+            image: "{{ image }}"
+            command:
+              - "/bin/sh"
+            args:
+              - "-ec"
+              - "if [ -d '/var/run/etcd/default.etcd' ]; then rm -rf /var/run/etcd/default.etcd;  fi && if [ -f '/var/run/etcd/member_id' ]; then rm -f /var/run/etcd/member_id;  fi"
+            volumeMounts: "{{ etcd_volume_mounts }}"
+      k8s:
+        state: present
+        definition:
+          apiVersion: "v1"
+          kind: Pod
+          metadata:
+            name: "{{ pod_name }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              etcd_cluster: "{{ meta.name }}"
+              app: "etcd"
+          spec:
+            serviceAccountName: "etcd-ansible-operator"
+            initContainers: "{{ init_containers }}"
+            hostname: "{{ pod_name }}"
+            subdomain: "{{ meta.name }}"
+            containers:
+              - name: "restore-datadir"
+                image: "{{ image }}"
+                command:
+                  - "/bin/sh"
+                args:
+                  - "-ec"
+                  - "while true; do
+                       echo 'Waiting for {{ pod_name }} to come up';
+                       ping -W 1 -c 1 {{ pod_name }}.{{ meta.name }}.{{ meta.namespace }}.svc.cluster.local > /dev/null && break;
+                       sleep 1s;
+                     done &&
+                    ETCDCTL_API=3 etcdctl snapshot restore /var/run/etcd/latest.backup
+                      --name {{ pod_name }}
+                      --initial-cluster {{ initial_cluster | join(',') }}
+                      --initial-cluster-token {{ etcd_token }}
+                      --initial-advertise-peer-urls {{ etcd_peer_url }}
+                      --data-dir /var/run/etcd/default.etcd 2>/dev/termination-log"
+                volumeMounts: "{{ etcd_volume_mounts }}"
+              - name: restore-check
+                image: "{{ image }}"
+                command:
+                  - "/bin/sh"
+                args:
+                  - "-ec"
+                  - "while [ ! -d '/var/run/etcd/default.etcd' ]; do sleep 1; done &&
+                    exit 0;"
+                volumeMounts: "{{ etcd_volume_mounts }}"
+            restartPolicy: OnFailure
+            volumes: "{{ etcd_volumes }}"
+      with_sequence: start=0 end={{cluster_spec[0].spec.size|int - 1}}
+
+    when: etcd_secure_peer == "absent"
+
+  - block:
+    - name: generate initial cluster variable
+      set_fact:
+        initial_cluster: "{{ initial_cluster + [meta.name + '-' + (item|string) + '=https://' + meta.name + '-' + (item|string) + '.' + meta.name + '.' + meta.namespace + '.svc.cluster.local:2380'] }}"
+      with_sequence: start=0 end={{cluster_spec[0].spec.size|int - 1}}
+
+    - name: Create Restore Pods
+      vars:
+        etcd_volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: "data-{{ meta.name }}-{{ item|string }}"
+        pod_name: "{{ meta.name }}-{{ item|string }}"
+        etcd_peer_url: "https://{{ meta.name }}-{{ item|string }}.{{meta.name}}.{{meta.namespace}}.svc.cluster.local:2380"
+        init_containers:
+          - name: "fetch-backup"
+            image: "docker.io/alaypatel07/etcd-ansible-restore"
+            command: ["ansible-playbook"]
+            args: "{{ fetch_args }}"
+            imagePullPolicy: Always
+            volumeMounts: "{{ etcd_volume_mounts }}"
+          - name: "delete-datadir"
+            image: "{{ image }}"
+            command:
+              - "/bin/sh"
+            args:
+              - "-ec"
+              - "if [ -d '/var/run/etcd/default.etcd' ]; then rm -rf /var/run/etcd/default.etcd;  fi && if [ -f '/var/run/etcd/member_id' ]; then rm -f /var/run/etcd/member_id;  fi"
+            volumeMounts: "{{ etcd_volume_mounts }}"
+      k8s:
+        state: present
+        definition:
+          apiVersion: "v1"
+          kind: Pod
+          metadata:
+            name: "{{ pod_name }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              etcd_cluster: "{{ meta.name }}"
+              app: "etcd"
+          spec:
+            serviceAccountName: "etcd-ansible-operator"
+            initContainers: "{{ init_containers }}"
+            hostname: "{{ pod_name }}"
+            subdomain: "{{ meta.name }}"
+            containers:
+              - name: "restore-datadir"
+                image: "{{ image }}"
+                command:
+                  - "/bin/sh"
+                args:
+                  - "-ec"
+                  - "while true; do
                      echo 'Waiting for {{ pod_name }} to come up';
                      ping -W 1 -c 1 {{ pod_name }}.{{ meta.name }}.{{ meta.namespace }}.svc.cluster.local > /dev/null && break;
                      sleep 1s;
@@ -223,20 +320,21 @@
                     --initial-cluster-token {{ etcd_token }}
                     --initial-advertise-peer-urls {{ etcd_peer_url }}
                     --data-dir /var/run/etcd/default.etcd 2>/dev/termination-log"
-              volumeMounts: "{{ etcd_volume_mounts }}"
-            - name: restore-check
-              image: "{{ image }}"
-              command:
-                - "/bin/sh"
-              args:
-                - "-ec"
-                - "while [ ! -d '/var/run/etcd/default.etcd' ]; do sleep 1; done &&
+                volumeMounts: "{{ etcd_volume_mounts }}"
+              - name: restore-check
+                image: "{{ image }}"
+                command:
+                  - "/bin/sh"
+                args:
+                  - "-ec"
+                  - "while [ ! -d '/var/run/etcd/default.etcd' ]; do sleep 1; done &&
                   exit 0;"
-              volumeMounts: "{{ etcd_volume_mounts }}"
-          restartPolicy: OnFailure
-          volumes: "{{ etcd_volumes }}"
-    with_sequence: start=0 end={{cluster_spec[0].spec.size|int - 1}}
+                volumeMounts: "{{ etcd_volume_mounts }}"
+            restartPolicy: OnFailure
+            volumes: "{{ etcd_volumes }}"
+      with_sequence: start=0 end={{cluster_spec[0].spec.size|int - 1}}
 
+    when: etcd_secure_peer == "present" and etcd_secure_client == "present"
 
   - name: Wait while 3 pods are running
     vars:
@@ -244,7 +342,7 @@
            label_selector='etcd_cluster='+ meta.name + ',app=etcd') }}"
     set_fact:
       c_pods: "{{ pods }}"
-    until: pods|length == 3 and pods[0].status.phase == "Succeeded"
+    until: pods|length == cluster_spec[0].spec.size and pods[0].status.phase == "Succeeded"
     retries: 30
     delay: 10
 
