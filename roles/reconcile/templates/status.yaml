@@ -6,6 +6,9 @@ serviceName: {{ etcd_cluster_name }}-client
 clientPort: {{ etcd_client_port }}
 currentVersion: {{ version }}
 targetVersion: {{ version }}
+peerTLSSecret: {{ peer_tls_secret | default ('') }}
+serverTLSSecret: {{ server_tls_secret | default ('') }}
+operatorTLSSecret: {{ operator_tls_secret | default('')  }}
 members:
   ready: {{ (etcd_cluster_members | map(attribute='name') | list) | join(',') }}
   unready: {{ (etcd_cluster_member_names | difference(etcd_cluster_members | map(attribute='name') | list)) | join(',') }}

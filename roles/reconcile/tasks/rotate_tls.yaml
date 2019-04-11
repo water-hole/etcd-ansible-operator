@@ -1,0 +1,50 @@
+- name: set cluster status before rotating TLS
+  vars:
+    etcd_status: "Rotating TLS"
+    peer_tls_secret: etcd_stateful_set[0].status.peerTLSSecret
+    server_tls_secret: etcd_stateful_set[0].status.serverTLSSecret
+    operator_tls_secret: etcd_stateful_set[0].status.operatorTLSSecret
+  k8s_status:
+    api_version: etcd.database.coreos.com/v1beta2
+    kind: EtcdCluster
+    name: "{{ etcd_cluster_name }}"
+    namespace: "{{ etcd_namespace }}"
+    status: "{{ lookup('template', 'status.yaml') | from_yaml }}"
+
+- name: patch the statefulset with new TLS and wait for pods to get restarted
+  vars:
+    size: "{{ etcd_stateful_set[0].spec.replicas }}"
+    peer_tls_secret: etcd_stateful_set[0].status.peerTLSSecret
+    server_tls_secret: etcd_stateful_set[0].status.serverTLSSecret
+    operator_tls_secret: etcd_stateful_set[0].status.operatorTLSSecret
+  k8s:
+    state: "present"
+    definition: "{{ lookup('template', 'ss.yaml') | from_yaml }}"
+  when: peer_tls_secret != _tls.static.member.peer_secret or server_tls != _tls.static.member.server_secret or operator_tls_secret != _tls.static.operator_secret
+
+- pause:
+    seconds: 1
+
+- name: make sure all the pods are running with new TLS
+  k8s_facts:
+    kind: StatefulSet
+    api_version: apps/v1
+    namespace: "{{ etcd_namespace }}"
+    name: "{{ etcd_cluster_name }}"
+  register: sts
+  until: sts.get("resources", []) and sts.resources[0].get("status", {}).get("readyReplicas", 0) == size
+  retries: 30
+  delay: 10
+
+- name: set cluster status with new TLS Secrets
+  vars:
+    etcd_status: "Rotating TLS"
+    peerTLSSecret: _tls.static.member.peer_secret
+    serverTLSSecret: _tls.static.member.server_secret
+    operatorTLSSecret: _tls.static.operator_secret
+  k8s_status:
+    api_version: etcd.database.coreos.com/v1beta2
+    kind: EtcdCluster
+    name: "{{ etcd_cluster_name }}"
+    namespace: "{{ etcd_namespace }}"
+    status: "{{ lookup('template', 'status.yaml') | from_yaml }}"

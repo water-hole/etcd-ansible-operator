@@ -11,6 +11,20 @@
       state: "present"
       definition: "{{ lookup('template', 'ss.yaml') | from_yaml }}"
 
+  - name: set tls status facts when present
+    set_fact:
+      peer_tls_secret: "{{ _tls.static.member.peer_secret }}"
+      server_tls_secret: "{{ _tls.static.member.server_secret }}"
+      operator_tls_secret: "{{ _tls.static.operator_secret }}"
+    when: etcd_secure_client == "present" and etcd_secure_peer == "present"
+
+  - name: set tls status facts when absent
+    set_fact:
+      peer_tls_secret: ""
+      server_tls_secret: ""
+      operator_tls_secret: ""
+    when: etcd_secure_client == "absent" and etcd_secure_peer == "absent"
+
   - name: set cluster status when new
     vars:
       etcd_status: "Creating"
@@ -23,11 +37,29 @@
 
   when: etcd_cluster_phase == "new"
 
+- name: set TLS status variables when present
+  set_fact:
+    peer_tls_secret: "{{ etcd_stateful_set[0].get('status', {}).get('peerTLSSecret', '') }}"
+    server_tls_secret: "{{ etcd_stateful_set[0].get('status', {}).get('serverTLSSecret', '') }}"
+    operator_tls_secret: "{{ etcd_stateful_set[0].get('status', {}).get('operatorTLSSecret', '') }}"
+  when: etcd_cluster_phase == "existing" and etcd_secure_client == "present" and etcd_secure_peer == "present"
+
+- name: set TLS status variables when absent
+  set_fact:
+    peer_tls_secret: ""
+    server_tls_secret: ""
+    operator_tls_secret: ""
+  when: etcd_cluster_phase == "existing" and etcd_secure_client == "absent" and etcd_secure_peer == "absent"
+
 - name: set cluster member names
   set_fact:
     etcd_cluster_member_names: "{{ etcd_cluster_member_names + [etcd_cluster_name + '-' + item|string] }}"
   with_sequence: start={{0}} end={{size - 1}}
   when: etcd_cluster_phase == "existing"
+
+- name: check if TLS rotation
+  include_tasks: rotate_tls.yaml
+  when: etcd_cluster_phase == "existing" and (etcd_secure_client == "present" or etcd_secure_peer == "present")
 
 - name: get members of cluster
   vars:
