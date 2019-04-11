@@ -84,7 +84,7 @@ $ kubectl create secret generic aws --from-file=$AWS_DIR/credentials --from-file
 Run the following commands to create the EtcdCluster CR, replacing `mybucket/etcd.backup` with the full path of the backup file:
 
 ```bash
-$ wget https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/restor_cr.yaml
+$ wget https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/restore_cr.yaml
 $ sed -e 's|<full-s3-path>|mybucket/etcd.backup|g' \
     -e 's|<aws-secret>|aws|g' \
     restore_cr.yaml \
@@ -98,7 +98,41 @@ $ kubectl get -w etcdrestore example-etcd-cluster -o jsonpath='{.status.phase}'
 ```
 
 ### Backup a cluster
-W.I.P
+This project only supports backing up on S3 bucket right now. To backup you will need the AWS `config` and `credentials` [file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). Place the config and credentials file in a directory and run following commands to create a secret:
+
+```bash
+$ export AWS_DIR="/path/to/aws/credentials"
+$ cat $AWS_DIR/credentials
+[default]
+aws_access_key_id = XXX
+aws_secret_access_key = XXX
+
+$ cat $AWS_DIR/config
+[default]
+region = <region>
+
+$ kubectl create secret generic aws --from-file=$AWS_DIR/credentials --from-file=$AWS_DIR/config
+```
+
+Run the following commands to backup the EtcdCluster CR, replacing `mybucket/etcd.backup` with the full path of the backup file, `<etcd-cluster-name>` with the EtcdCluster CR name and  `<namespace>` with namespace of the EtcdCluster CR:
+
+
+```bash
+$ wget https://raw.githubusercontent.com/alaypatel07/etcd-sts-operator/master/deploy/backup_cr.yaml
+$ sed -e 's|<full-s3-path>|mybucket/etcd.backup|g' \
+    -e 's|<aws-secret>|aws|g' \
+    -e 's|<etcd-cluster-endpoints>|"http://<etcd-cluster-name>-client.<namespace>.svc.cluster.local:2379"|g' \
+    example/etcd-backup-operator/backup_cr.yaml \
+    | kubectl create -f -
+```
 
 ### TLS certs for the cluster
-W.I.P
+The operator assumes that the admin has created TLS certificates and corresponding secrets for the EtcdCluster CR. For trying out, run the following commands to create certificates for `example-etcd-cluster`
+
+```bash
+$ docker run -it -e USERNAME=$(id -un) -e HOME=$HOME --entrypoint /bin/bash -u $(id -u):0 -w $(pwd) -v $HOME:$HOME:Z quay.io/operator-framework/ansible-operator  -c 'echo "${USERNAME}:x:$(id -u):$(id -g)::${HOME}:/bin/bash" >>/etc/passwd && bash'
+ansible-playbook tls_playbook.yaml
+exit
+``` 
+
+Now, create EtcdCluster CR with TLS enabled with `kubectl create -f deploy/cr_tls.yaml`
