@@ -2,7 +2,7 @@
 - name: lookup the operator secret and populate the certs
   vars:
     operator_secret: "{{ lookup('k8s', api_version='v1', kind='Secret', namespace=etcd_namespace,
-                                resource_name=_tls.static.operator_secret) }}"
+                                resource_name=tls_secret_name) }}"
   set_fact:
 #    operator_secret: "{{ lookup('k8s', api_version='v1', kind='Secret', namespace=etcd_namespace,
 #                                  resource_name=_tls.static.operator_secret) }}"
@@ -20,7 +20,7 @@
 
 - name: create ca file
   copy:
-    dest: "{{ tls_directory }}/etcd-ca.cert"
+    dest: "{{ tls_directory }}/etcd-ca.crt"
     content: "{{ ca_cert }}"
 
 - name: create client certificate

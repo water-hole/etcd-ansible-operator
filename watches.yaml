@@ -6,11 +6,10 @@
 
 - version: v1beta2
   group: etcd.database.coreos.com
-  kind: EtcdBackup
-  playbook: /opt/ansible/backup_playbook.yaml
+  kind: EtcdRestore
+  playbook: /opt/ansible/restore_playbook.yaml
 
 - version: v1beta2
   group: etcd.database.coreos.com
-  kind: EtcdRestore
-  reconcilePeriod: 10h
-  playbook: /opt/ansible/restore_playbook.yaml
+  kind: EtcdBackup
+  playbook: /opt/ansible/backup_playbook.yaml

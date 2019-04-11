@@ -45,6 +45,24 @@
     etcd_host: "{{ etcd_endpoints.split('://')[1].split(':')[0] }}"
     etcd_port: "{{ etcd_endpoints.split('://')[1].split(':')[1]  }}"
 
+- name: Create certs if TLS is enabled
+  vars:
+    tls_secret_name: "{{ client_tls_secret }}"
+  include_tasks: create_certs.yaml
+  when: client_tls_secret is defined
+
+- name: Create etcd back when secure
+  etcd_member:
+    state: "present"
+    type:  "backup"
+    cluster_host: "{{ etcd_host }}"
+    cluster_port: "{{ etcd_port }}"
+    filename: "{{ local_file }}"
+    ca_cert: "{{ tls_directory }}/etcd-ca.crt"
+    cert_cert: "{{ tls_directory }}/etcd-client.crt"
+    cert_key: "{{ tls_directory }}/etcd-client.key"
+  when: client_tls_secret is defined
+
 - name: Create etcd backup
   etcd_member:
     state: "present"
@@ -52,6 +70,7 @@
     cluster_host: "{{ etcd_host }}"
     cluster_port: "{{ etcd_port }}"
     filename: "{{ local_file }}"
+  when: client_tls_secret is undefined
 
 - name: Upload data
   aws_s3:

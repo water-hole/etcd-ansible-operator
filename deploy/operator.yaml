@@ -14,8 +14,18 @@ spec:
     spec:
       serviceAccountName: etcd-ansible-operator
       containers:
+        - name: ansible
+          command:
+            - /usr/local/bin/ao-logs
+            - /tmp/ansible-operator/runner
+            - stdout
+          image: docker.io/alaypatel07/etcd-ansible-operator:sts
+          volumeMounts:
+            - mountPath: /tmp/ansible-operator/runner
+              name: runner
+              readOnly: true
         - name: etcd-ansible-operator
-          image: docker.io/alaypatel07/etcd-ansible-operator:v0.5.0
+          image: docker.io/alaypatel07/etcd-ansible-operator:sts
           ports:
           - containerPort: 60000
             name: metrics
@@ -31,3 +41,9 @@ spec:
                 fieldPath: metadata.name
           - name: OPERATOR_NAME
             value: "etcd-ansible-operator"
+          volumeMounts:
+            - mountPath: /tmp/ansible-operator/runner
+              name: runner
+      volumes:
+        - name: runner
+          emptyDir: {}
