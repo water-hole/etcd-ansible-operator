@@ -10,4 +10,4 @@ spec:
         peerSecret: etcd-peer-tls
         serverSecret: etcd-server-tls
       operatorSecret: etcd-client-tls
-  version: "3.2.13"
+  version: "3.3.8"
